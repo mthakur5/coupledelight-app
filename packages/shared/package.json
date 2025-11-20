@@ -1,0 +1,19 @@
+{
+  "name": "@coupledelight/shared",
+  "version": "1.0.0",
+  "description": "Shared models, types, and utilities for CoupleDelight",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"No tests yet\""
+  },
+  "keywords": ["coupledelight", "shared", "models"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mongoose": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
