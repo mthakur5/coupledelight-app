@@ -131,12 +131,12 @@ export default async function BookingsPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {bookings.map((booking) => {
+                  {bookings.map((booking: any) => {
                     const user = booking.userId as any;
                     const event = booking.eventId as any;
                     
                     return (
-                      <tr key={booking._id.toString()} className="hover:bg-gray-50 transition-colors">
+                      <tr key={String(booking._id)} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">{booking.bookingNumber}</div>
                           <div className="text-xs text-gray-500">
