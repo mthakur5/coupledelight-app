@@ -52,7 +52,7 @@ async function getBookingsData() {
     .populate('userId', 'name email')
     .populate('eventId', 'title category')
     .sort({ createdAt: -1 })
-    .lean();
+    .lean() as unknown as PopulatedBooking[];
 
   const stats = {
     totalBookings: bookings.length,
@@ -172,13 +172,9 @@ export default async function BookingsPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {bookings.map((booking: PopulatedBooking) => {
-                    const user = typeof booking.userId !== 'string' && booking.userId !== null
-                      ? (booking.userId as PopulatedUser)
-                      : null;
-                    const event = typeof booking.eventId !== 'string' && booking.eventId !== null
-                      ? (booking.eventId as PopulatedEvent)
-                      : null;
+                  {bookings.map((booking) => {
+                    const user = booking.userId as PopulatedUser;
+                    const event = booking.eventId as PopulatedEvent;
                     
                     return (
                       <tr key={String(booking._id)} className="hover:bg-gray-50 transition-colors">
