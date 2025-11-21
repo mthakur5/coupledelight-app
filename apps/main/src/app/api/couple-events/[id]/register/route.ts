@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -31,7 +31,7 @@ export async function POST(
       );
     }
 
-    const eventId = params.id;
+    const { id: eventId } = await params;
     const coupleId = user.coupleId;
 
     // Find the event
@@ -98,7 +98,7 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -122,7 +122,7 @@ export async function DELETE(
       );
     }
 
-    const eventId = params.id;
+    const { id: eventId } = await params;
     const coupleId = user.coupleId;
 
     // Find the event
