@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AuthModals from "@/components/AuthModals";
 import CoupleOnlyNotification from "@/components/CoupleOnlyNotification";
+import LogoutButton from "@/components/LogoutButton";
 
 export default function Home() {
   const { data: session, status, update } = useSession();
@@ -94,6 +95,7 @@ export default function Home() {
                   >
                     Dashboard
                   </Link>
+                  <LogoutButton />
                 </>
               ) : (
                 <>
@@ -158,7 +160,16 @@ export default function Home() {
             </p>
           </div>
 
-          <Link href="/shop" className="block bg-black/40 backdrop-blur-md p-6 rounded-lg border border-purple-500/20 hover:border-purple-500/40 transition-all group cursor-pointer">
+          <div
+            onClick={() => {
+              if (session) {
+                router.push('/shop');
+              } else {
+                openRegister();
+              }
+            }}
+            className="block bg-black/40 backdrop-blur-md p-6 rounded-lg border border-purple-500/20 hover:border-purple-500/40 transition-all group cursor-pointer"
+          >
             <div className="text-4xl mb-4">🛍️</div>
             <h3 className="text-2xl font-semibold mb-2 text-purple-300 group-hover:text-purple-200 transition-colors">Premium Shop</h3>
             <p className="text-purple-100 mb-4">
@@ -166,9 +177,9 @@ export default function Home() {
               and pleasure products. Discreet packaging and secure checkout guaranteed.
             </p>
             <span className="text-purple-400 group-hover:text-purple-300 font-medium">
-              Browse Products →
+              {session ? 'Browse Products →' : 'Sign Up to Browse →'}
             </span>
-          </Link>
+          </div>
 
           <div className="bg-black/40 backdrop-blur-md p-6 rounded-lg border border-rose-500/20 hover:border-rose-500/40 transition-all">
             <div className="text-4xl mb-4">🔒</div>

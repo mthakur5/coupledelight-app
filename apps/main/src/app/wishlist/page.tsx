@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import LogoutButton from "@/components/LogoutButton";
 
 export default async function WishlistPage() {
   const session = await auth();
@@ -47,6 +48,12 @@ export default async function WishlistPage() {
                   Shop
                 </Link>
               </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-gray-700 text-sm">
+                {session.user?.email}
+              </span>
+              <LogoutButton />
             </div>
           </div>
         </div>

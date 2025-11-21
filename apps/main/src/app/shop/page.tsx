@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
 import { ShoppingBag, Search } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import LogoutButton from '@/components/LogoutButton';
 
 interface Product {
   _id: string;
@@ -38,6 +40,7 @@ export default function ShopPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [mounted, setMounted] = useState(false);
   const { addToCart, cartCount, openCart } = useCart();
+  const { data: session } = useSession();
 
   useEffect(() => {
     setMounted(true);
@@ -114,19 +117,24 @@ export default function ShopPage() {
               </div>
             </div>
 
-            {/* Cart Button */}
-            <button
-              onClick={openCart}
-              className="relative p-3 hover:bg-gray-100 rounded-full transition-colors"
-              aria-label="Open cart"
-            >
-              <ShoppingBag className="w-6 h-6 text-gray-700" />
-              {mounted && cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-pink-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                  {cartCount}
-                </span>
-              )}
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Cart Button */}
+              <button
+                onClick={openCart}
+                className="relative p-3 hover:bg-gray-100 rounded-full transition-colors"
+                aria-label="Open cart"
+              >
+                <ShoppingBag className="w-6 h-6 text-gray-700" />
+                {mounted && cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-pink-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+              
+              {/* Logout Button */}
+              {session && <LogoutButton />}
+            </div>
           </div>
 
           {/* Search Bar - Mobile */}
