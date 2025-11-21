@@ -1,6 +1,7 @@
-import { auth, signOut } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import LogoutButton from "@/components/LogoutButton";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -34,6 +35,12 @@ export default async function DashboardPage() {
                   Events
                 </Link>
                 <Link
+                  href="/my-orders"
+                  className="text-gray-600 hover:text-purple-600"
+                >
+                  My Orders
+                </Link>
+                <Link
                   href="/wishlist"
                   className="text-gray-600 hover:text-purple-600"
                 >
@@ -51,22 +58,7 @@ export default async function DashboardPage() {
               <span className="text-gray-700 text-sm">
                 {session.user?.email}
               </span>
-              <form
-                action={async () => {
-                  "use server";
-                  await signOut({
-                    redirectTo: "/",
-                    redirect: true
-                  });
-                }}
-              >
-                <button
-                  type="submit"
-                  className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors text-sm font-medium"
-                >
-                  Sign Out
-                </button>
-              </form>
+              <LogoutButton />
             </div>
           </div>
         </div>
@@ -78,7 +70,7 @@ export default async function DashboardPage() {
             Welcome back! 👋
           </h1>
           <p className="text-gray-600 mt-2">
-            Here's what's happening in your relationship space
+            Here is what is happening in your relationship space
           </p>
         </div>
 
@@ -113,6 +105,23 @@ export default async function DashboardPage() {
               className="text-purple-600 text-sm font-medium mt-4 inline-block hover:text-purple-700"
             >
               Create Event →
+            </Link>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                My Orders
+              </h3>
+              <span className="text-3xl">📦</span>
+            </div>
+            <p className="text-3xl font-bold text-purple-600 mb-2">0</p>
+            <p className="text-gray-600 text-sm">No recent orders</p>
+            <Link
+              href="/my-orders"
+              className="text-purple-600 text-sm font-medium mt-4 inline-block hover:text-purple-700"
+            >
+              View Orders →
             </Link>
           </div>
 
@@ -163,7 +172,7 @@ export default async function DashboardPage() {
                   Account Created
                 </h3>
                 <p className="text-gray-600 text-sm">
-                  You've successfully created your account!
+                  You have successfully created your account!
                 </p>
               </div>
             </div>

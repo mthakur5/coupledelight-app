@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useCart } from '@/contexts/CartContext';
 import { ShoppingBag, ArrowLeft, CreditCard, Wallet, Building2 } from 'lucide-react';
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const { cart, cartTotal, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
@@ -84,7 +86,12 @@ export default function CheckoutPage() {
       if (response.ok) {
         alert(`Order placed successfully! Your order number is: ${data.order.orderNumber}\n\nThank you for your purchase!`);
         clearCart();
-        router.push('/shop');
+        // Redirect to my orders page if user is logged in, otherwise to shop
+        if (session) {
+          router.push('/my-orders');
+        } else {
+          router.push('/shop');
+        }
       } else {
         alert(`Error: ${data.error || 'Failed to place order'}`);
       }

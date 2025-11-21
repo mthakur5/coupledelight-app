@@ -3,22 +3,37 @@
 import { auth } from "@/lib/auth";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AuthModals from "@/components/AuthModals";
 import CoupleOnlyNotification from "@/components/CoupleOnlyNotification";
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
+  const router = useRouter();
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   
-  // Force refresh session status on mount to ensure clean state after signout
+  // Force refresh session on mount and when coming back to page
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      // Clear any stale session data
-      window.localStorage.removeItem('session-check');
-    }
-  }, [status]);
+    const refreshSession = async () => {
+      await update();
+    };
+    refreshSession();
+  }, [update]);
+
+  // Listen for storage events (logout from other tabs)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'logout-event') {
+        update();
+        router.refresh();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [update, router]);
 
   const openLogin = () => {
     setShowRegister(false);
