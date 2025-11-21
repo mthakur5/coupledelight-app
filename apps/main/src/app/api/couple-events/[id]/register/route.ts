@@ -24,7 +24,7 @@ export async function POST(
     // Get user's couple ID from database
     const user = await User.findById(session.user.id);
     
-    if (!user || !user.coupleId) {
+    if (!user || !(user as any).coupleId) {
       return NextResponse.json(
         { error: "You must be part of a couple to register for events" },
         { status: 400 }
@@ -32,7 +32,7 @@ export async function POST(
     }
 
     const { id: eventId } = await params;
-    const coupleId = user.coupleId;
+    const coupleId = (user as any).coupleId;
 
     // Find the event
     const event = await CoupleEvent.findById(eventId);
@@ -115,7 +115,7 @@ export async function DELETE(
     // Get user's couple ID from database
     const user = await User.findById(session.user.id);
     
-    if (!user || !user.coupleId) {
+    if (!user || !(user as any).coupleId) {
       return NextResponse.json(
         { error: "You must be part of a couple" },
         { status: 400 }
@@ -123,7 +123,7 @@ export async function DELETE(
     }
 
     const { id: eventId } = await params;
-    const coupleId = user.coupleId;
+    const coupleId = (user as any).coupleId;
 
     // Find the event
     const event = await CoupleEvent.findById(eventId);
