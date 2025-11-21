@@ -6,7 +6,7 @@ import { auth } from '@/lib/auth';
 // GET - Fetch a single order by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
@@ -15,7 +15,8 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const email = searchParams.get('email');
 
-    const order = await Order.findById(params.id).lean();
+    const { id } = await params;
+    const order = await Order.findById(id).lean();
 
     if (!order) {
       return NextResponse.json(
@@ -61,7 +62,7 @@ export async function GET(
 // PATCH - Update order (for cancellation)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
@@ -70,7 +71,8 @@ export async function PATCH(
     const body = await request.json();
     const { action, cancelReason } = body;
 
-    const order = await Order.findById(params.id);
+    const { id } = await params;
+    const order = await Order.findById(id);
 
     if (!order) {
       return NextResponse.json(
