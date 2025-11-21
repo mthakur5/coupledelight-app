@@ -4,6 +4,47 @@ import dbConnect from '@/lib/db';
 import Booking from '@/models/Booking';
 import Link from 'next/link';
 
+interface PopulatedUser {
+  _id: string;
+  name: string;
+  email: string;
+}
+
+interface PopulatedEvent {
+  _id: string;
+  title: string;
+  category: string;
+}
+
+interface PopulatedBooking {
+  _id: string;
+  bookingNumber: string;
+  userId: string | PopulatedUser;
+  eventId: string | PopulatedEvent;
+  eventDetails?: {
+    title: string;
+    location?: string;
+    price?: number;
+  };
+  bookingDate: Date;
+  bookingTime: string;
+  numberOfPeople: number;
+  totalAmount: number;
+  contactDetails: {
+    name: string;
+    phone: string;
+    email: string;
+  };
+  specialRequests?: string;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  paymentStatus: 'pending' | 'paid' | 'refunded';
+  paymentMethod: 'COD' | 'online';
+  confirmationSent: boolean;
+  reminderSent: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 async function getBookingsData() {
   await dbConnect();
   
@@ -131,9 +172,9 @@ export default async function BookingsPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {bookings.map((booking: any) => {
-                    const user = booking.userId as any;
-                    const event = booking.eventId as any;
+                  {bookings.map((booking: PopulatedBooking) => {
+                    const user = typeof booking.userId === 'object' ? booking.userId as PopulatedUser : null;
+                    const event = typeof booking.eventId === 'object' ? booking.eventId as PopulatedEvent : null;
                     
                     return (
                       <tr key={String(booking._id)} className="hover:bg-gray-50 transition-colors">
