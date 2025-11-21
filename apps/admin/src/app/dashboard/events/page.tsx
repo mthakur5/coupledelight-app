@@ -1,36 +1,73 @@
-export const runtime = 'nodejs';
+'use client';
 
-import dbConnect from '@/lib/db';
-import Event from '@/models/Event';
-import Couple from '@/models/Couple';
-import User from '@/models/User';
+import { useState, useEffect } from 'react';
+import CreateEventModal from '@/components/CreateEventModal';
 
-async function getEventsData() {
-  await dbConnect();
-  
-  const events = await Event.find()
-    .populate({
-      path: 'coupleId',
-      populate: [
-        { path: 'user1Id', select: 'email' },
-        { path: 'user2Id', select: 'email' }
-      ]
-    })
-    .sort({ date: -1 })
-    .lean();
-
-  const stats = {
-    totalEvents: events.length,
-    upcomingEvents: events.filter((e) => e.status === 'upcoming').length,
-    completedEvents: events.filter((e) => e.status === 'completed').length,
-    plannedEvents: events.filter((e) => e.status === 'planned').length,
-  };
-
-  return { events, stats };
+interface Event {
+  _id: string;
+  title: string;
+  description?: string;
+  date: Date;
+  category: string;
+  status: 'upcoming' | 'completed' | 'planned' | 'cancelled';
+  location?: string;
+  isPublic: boolean;
+  maxRegistrations: number;
+  registeredCouples: Array<{
+    _id: string;
+    user1Id: { email: string; name?: string };
+    user2Id: { email: string; name?: string };
+  }>;
 }
 
-export default async function EventsPage() {
-  const { events, stats } = await getEventsData();
+interface Stats {
+  totalEvents: number;
+  upcomingEvents: number;
+  completedEvents: number;
+  plannedEvents: number;
+}
+
+export default function EventsPage() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [stats, setStats] = useState<Stats>({
+    totalEvents: 0,
+    upcomingEvents: 0,
+    completedEvents: 0,
+    plannedEvents: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/events');
+      if (response.ok) {
+        const data = await response.json();
+        setEvents(data);
+        
+        // Calculate stats
+        setStats({
+          totalEvents: data.length,
+          upcomingEvents: data.filter((e: Event) => e.status === 'upcoming').length,
+          completedEvents: data.filter((e: Event) => e.status === 'completed').length,
+          plannedEvents: data.filter((e: Event) => e.status === 'planned').length,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEventCreated = () => {
+    fetchEvents(); // Refresh the events list
+  };
 
   return (
     <div className="space-y-6">
@@ -40,6 +77,12 @@ export default async function EventsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Events Management</h1>
           <p className="text-gray-600 mt-2">Monitor and manage couple events</p>
         </div>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg font-medium hover:from-pink-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
+        >
+          + Create Event
+        </button>
       </div>
 
       {/* Stats Cards */}
@@ -87,11 +130,22 @@ export default async function EventsPage() {
 
       {/* Events Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {events.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="text-4xl mb-4">⏳</div>
+            <p className="text-gray-600">Loading events...</p>
+          </div>
+        ) : events.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🎉</div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No Events Yet</h3>
-            <p className="text-gray-600">Events will appear here once couples start creating them</p>
+            <p className="text-gray-600 mb-4">Create your first event to get started</p>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="px-6 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg font-medium hover:from-pink-600 hover:to-purple-700 transition-all"
+            >
+              Create First Event
+            </button>
           </div>
         ) : (
           <>
@@ -103,7 +157,7 @@ export default async function EventsPage() {
                       Event
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Couple
+                      Registrations
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Date
@@ -115,7 +169,7 @@ export default async function EventsPage() {
                       Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Attendees
+                      Capacity
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
@@ -124,13 +178,11 @@ export default async function EventsPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {events.map((event) => {
-                    const couple = event.coupleId as any;
-                    const coupleName = couple && couple.user1Id && couple.user2Id 
-                      ? `${couple.user1Id.email.split('@')[0]} & ${couple.user2Id.email.split('@')[0]}`
-                      : 'Unknown Couple';
+                    const registeredCount = event.registeredCouples?.length || 0;
+                    const spotsLeft = event.maxRegistrations - registeredCount;
                     
                     return (
-                      <tr key={event._id.toString()} className="hover:bg-gray-50 transition-colors">
+                      <tr key={event._id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
@@ -138,11 +190,31 @@ export default async function EventsPage() {
                             </div>
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900">{event.title}</div>
-                              <div className="text-sm text-gray-500">ID: {event._id.toString().slice(-8)}</div>
+                              <div className="text-sm text-gray-500">ID: {event._id.slice(-8)}</div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{coupleName}</td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm">
+                            <div className="font-medium text-gray-900">{registeredCount} couples registered</div>
+                            {event.registeredCouples && event.registeredCouples.length > 0 ? (
+                              <div className="mt-1 space-y-1">
+                                {event.registeredCouples.slice(0, 3).map((couple) => (
+                                  <div key={couple._id} className="text-xs text-gray-600">
+                                    • {couple.user1Id?.email?.split('@')[0] || 'User'} & {couple.user2Id?.email?.split('@')[0] || 'User'}
+                                  </div>
+                                ))}
+                                {event.registeredCouples.length > 3 && (
+                                  <div className="text-xs text-gray-500 italic">
+                                    +{event.registeredCouples.length - 3} more
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="text-xs text-gray-500 mt-1">No registrations yet</div>
+                            )}
+                          </div>
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {new Date(event.date).toLocaleDateString('en-US', {
                             year: 'numeric',
@@ -169,7 +241,13 @@ export default async function EventsPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {event.attendees} people
+                          {registeredCount} / {event.maxRegistrations}
+                          {spotsLeft > 0 && (
+                            <div className="text-xs text-green-600 mt-1">{spotsLeft} spots left</div>
+                          )}
+                          {spotsLeft === 0 && (
+                            <div className="text-xs text-red-600 mt-1">Full</div>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <button className="text-pink-600 hover:text-pink-900 mr-4">View</button>
@@ -203,6 +281,13 @@ export default async function EventsPage() {
           </>
         )}
       </div>
+
+      {/* Create Event Modal */}
+      <CreateEventModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleEventCreated}
+      />
     </div>
   );
 }

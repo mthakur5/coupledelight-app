@@ -54,12 +54,15 @@ export default async function DashboardPage() {
               <form
                 action={async () => {
                   "use server";
-                  await signOut({ redirectTo: "/" });
+                  await signOut({
+                    redirectTo: "/",
+                    redirect: true
+                  });
                 }}
               >
                 <button
                   type="submit"
-                  className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors text-sm"
+                  className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors text-sm font-medium"
                 >
                   Sign Out
                 </button>

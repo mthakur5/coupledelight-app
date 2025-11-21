@@ -5,10 +5,12 @@ import User from "@/models/User";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, profile } = await req.json();
+    const body = await req.json();
+    const { email, password, profile } = body;
 
     // Validate input
     if (!email || !password) {
+      console.error("Registration validation failed: Missing email or password");
       return NextResponse.json(
         { error: "Email and password are required" },
         { status: 400 }
@@ -16,6 +18,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (password.length < 6) {
+      console.error("Registration validation failed: Password too short");
       return NextResponse.json(
         { error: "Password must be at least 6 characters" },
         { status: 400 }
@@ -23,11 +26,15 @@ export async function POST(req: NextRequest) {
     }
 
     // Connect to database
+    console.log("Connecting to database...");
     await dbConnect();
+    console.log("Database connected successfully");
 
     // Check if user already exists
+    console.log("Checking for existing user:", email);
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.error("User already exists:", email);
       return NextResponse.json(
         { error: "User with this email already exists" },
         { status: 400 }
@@ -35,9 +42,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Hash password
+    console.log("Hashing password...");
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create new user
+    console.log("Creating new user...");
     const user = await User.create({
       email,
       password: hashedPassword,
@@ -46,6 +55,7 @@ export async function POST(req: NextRequest) {
       emailVerified: false,
       profile: profile || {},
     });
+    console.log("User created successfully:", user._id);
 
     return NextResponse.json(
       {
@@ -61,8 +71,24 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     console.error("Registration error:", error);
+    
+    // Check if it's a MongoDB duplicate key error
+    interface MongoError extends Error {
+      code?: number;
+    }
+    
+    if (error instanceof Error && 'code' in error && (error as MongoError).code === 11000) {
+      return NextResponse.json(
+        { error: "User with this email already exists" },
+        { status: 400 }
+      );
+    }
+    
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error"
+      },
       { status: 500 }
     );
   }

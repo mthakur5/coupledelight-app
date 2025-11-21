@@ -8,9 +8,17 @@ import AuthModals from "@/components/AuthModals";
 import CoupleOnlyNotification from "@/components/CoupleOnlyNotification";
 
 export default function Home() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  
+  // Force refresh session status on mount to ensure clean state after signout
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      // Clear any stale session data
+      window.localStorage.removeItem('session-check');
+    }
+  }, [status]);
 
   const openLogin = () => {
     setShowRegister(false);

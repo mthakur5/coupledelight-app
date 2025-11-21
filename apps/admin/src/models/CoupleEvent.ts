@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export interface IEvent extends Document {
+export interface ICoupleEvent extends Document {
   coupleId?: mongoose.Types.ObjectId;
   title: string;
   description?: string;
@@ -17,7 +17,7 @@ export interface IEvent extends Document {
   updatedAt: Date;
 }
 
-const EventSchema: Schema<IEvent> = new Schema(
+const CoupleEventSchema: Schema<ICoupleEvent> = new Schema(
   {
     coupleId: {
       type: Schema.Types.ObjectId,
@@ -75,11 +75,13 @@ const EventSchema: Schema<IEvent> = new Schema(
 );
 
 // Indexes for faster queries
-EventSchema.index({ coupleId: 1 });
-EventSchema.index({ status: 1 });
-EventSchema.index({ date: 1 });
-EventSchema.index({ category: 1 });
+CoupleEventSchema.index({ coupleId: 1 });
+CoupleEventSchema.index({ status: 1 });
+CoupleEventSchema.index({ date: 1 });
+CoupleEventSchema.index({ category: 1 });
+CoupleEventSchema.index({ isPublic: 1 });
+CoupleEventSchema.index({ registeredCouples: 1 });
 
-const Event: Model<IEvent> = mongoose.models.Event || mongoose.model<IEvent>('Event', EventSchema);
+const CoupleEvent: Model<ICoupleEvent> = mongoose.models.CoupleEvent || mongoose.model<ICoupleEvent>('CoupleEvent', CoupleEventSchema);
 
-export default Event;
+export default CoupleEvent;

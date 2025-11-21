@@ -94,9 +94,16 @@ export const authConfig: NextAuthConfig = {
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as any).id = token.id;
-        (session.user as any).role = token.role;
-        (session.user as any).emailVerified = token.emailVerified;
+        // Safely extend session user with additional properties
+        return {
+          ...session,
+          user: {
+            ...session.user,
+            id: token.id as string,
+            role: token.role as string,
+            emailVerified: token.emailVerified as boolean,
+          },
+        };
       }
       return session;
     },
@@ -106,6 +113,7 @@ export const authConfig: NextAuthConfig = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
+  trustHost: true, // Required for Vercel deployments
 };
 
 export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
