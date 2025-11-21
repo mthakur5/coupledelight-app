@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ReactElement } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -143,7 +143,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
     cancelled: 'bg-red-100 text-red-800',
   };
 
-  const statusIcons: Record<string, JSX.Element> = {
+  const statusIcons: Record<string, ReactElement> = {
     pending: <Package className="w-5 h-5" />,
     confirmed: <CheckCircle className="w-5 h-5" />,
     processing: <Package className="w-5 h-5" />,
