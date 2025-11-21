@@ -5,7 +5,7 @@ import Event from "@/models/Event";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -19,7 +19,8 @@ export async function GET(
 
     await dbConnect();
 
-    const event = await Event.findById(params.id).populate("createdBy", "name email");
+    const { id } = await params;
+    const event = await Event.findById(id).populate("createdBy", "name email");
 
     if (!event) {
       return NextResponse.json(
@@ -40,7 +41,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -55,9 +56,10 @@ export async function PUT(
     await dbConnect();
 
     const body = await request.json();
+    const { id } = await params;
 
     const event = await Event.findByIdAndUpdate(
-      params.id,
+      id,
       body,
       { new: true, runValidators: true }
     );
@@ -81,7 +83,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -95,7 +97,8 @@ export async function DELETE(
 
     await dbConnect();
 
-    const event = await Event.findByIdAndDelete(params.id);
+    const { id } = await params;
+    const event = await Event.findByIdAndDelete(id);
 
     if (!event) {
       return NextResponse.json(
