@@ -5,6 +5,11 @@ import CoupleEvent from "@/models/CoupleEvent";
 import User from "@/models/User";
 import mongoose from "mongoose";
 
+interface UserWithCouple {
+  _id: mongoose.Types.ObjectId;
+  coupleId?: mongoose.Types.ObjectId | string;
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -22,9 +27,9 @@ export async function POST(
     await dbConnect();
 
     // Get user's couple ID from database
-    const user = await User.findById(session.user.id);
+    const user = await User.findById(session.user.id) as UserWithCouple | null;
     
-    if (!user || !(user as any).coupleId) {
+    if (!user || !user.coupleId) {
       return NextResponse.json(
         { error: "You must be part of a couple to register for events" },
         { status: 400 }
@@ -32,7 +37,7 @@ export async function POST(
     }
 
     const { id: eventId } = await params;
-    const coupleId = (user as any).coupleId;
+    const coupleId = user.coupleId;
 
     // Find the event
     const event = await CoupleEvent.findById(eventId);
@@ -113,9 +118,9 @@ export async function DELETE(
     await dbConnect();
 
     // Get user's couple ID from database
-    const user = await User.findById(session.user.id);
+    const user = await User.findById(session.user.id) as UserWithCouple | null;
     
-    if (!user || !(user as any).coupleId) {
+    if (!user || !user.coupleId) {
       return NextResponse.json(
         { error: "You must be part of a couple" },
         { status: 400 }
@@ -123,7 +128,7 @@ export async function DELETE(
     }
 
     const { id: eventId } = await params;
-    const coupleId = (user as any).coupleId;
+    const coupleId = user.coupleId;
 
     // Find the event
     const event = await CoupleEvent.findById(eventId);
