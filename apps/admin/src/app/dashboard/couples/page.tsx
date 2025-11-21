@@ -9,8 +9,8 @@ import { Types } from 'mongoose';
 
 interface PopulatedCouple {
   _id: Types.ObjectId;
-  user1Id: { email: string; _id: Types.ObjectId };
-  user2Id: { email: string; _id: Types.ObjectId };
+  user1Id: { email: string; _id: Types.ObjectId } | Types.ObjectId;
+  user2Id: { email: string; _id: Types.ObjectId } | Types.ObjectId;
   relationshipStartDate: Date;
   status: string;
   createdAt: Date;
@@ -24,7 +24,7 @@ async function getCouplesData() {
     .populate('user1Id', 'email')
     .populate('user2Id', 'email')
     .sort({ createdAt: -1 })
-    .lean();
+    .lean() as PopulatedCouple[];
 
   // Get event counts for each couple
   const couplesWithEventCounts = await Promise.all(
@@ -151,11 +151,13 @@ export default async function CouplesPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                            {couple.user1Id?.email?.charAt(0).toUpperCase() || '?'}
+                            {(typeof couple.user1Id === 'object' && couple.user1Id && 'email' in couple.user1Id)
+                              ? couple.user1Id.email.charAt(0).toUpperCase()
+                              : '?'}
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">
-                              {couple.user1Id?.email || 'Unknown'} & {couple.user2Id?.email || 'Unknown'}
+                              {(typeof couple.user1Id === 'object' && couple.user1Id && 'email' in couple.user1Id) ? couple.user1Id.email : 'Unknown'} & {(typeof couple.user2Id === 'object' && couple.user2Id && 'email' in couple.user2Id) ? couple.user2Id.email : 'Unknown'}
                             </div>
                             <div className="text-sm text-gray-500">ID: {couple._id.toString().slice(-8)}</div>
                           </div>
