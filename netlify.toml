@@ -1,7 +1,7 @@
 [build]
   base = "apps/admin"
   command = "npm run build"
-  publish = "apps/admin/.next"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20.11.0"
