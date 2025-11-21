@@ -3,5 +3,8 @@
   command = "npm run build"
   publish = "apps/admin/.next"
 
+[build.environment]
+  NODE_VERSION = "20.11.0"
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
