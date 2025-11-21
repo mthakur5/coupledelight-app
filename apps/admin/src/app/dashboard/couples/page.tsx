@@ -7,13 +7,16 @@ import Event from '@/models/Event';
 import Link from 'next/link';
 import { Types } from 'mongoose';
 
-interface PopulatedCouple {
+interface BaseCouple {
   _id: Types.ObjectId;
   user1Id: { email: string; _id: Types.ObjectId } | Types.ObjectId;
   user2Id: { email: string; _id: Types.ObjectId } | Types.ObjectId;
   relationshipStartDate: Date;
   status: string;
   createdAt: Date;
+}
+
+interface PopulatedCouple extends BaseCouple {
   eventCount: number;
 }
 
@@ -24,13 +27,13 @@ async function getCouplesData() {
     .populate('user1Id', 'email')
     .populate('user2Id', 'email')
     .sort({ createdAt: -1 })
-    .lean() as PopulatedCouple[];
+    .lean();
 
   // Get event counts for each couple
-  const couplesWithEventCounts = await Promise.all(
+  const couplesWithEventCounts: PopulatedCouple[] = await Promise.all(
     couples.map(async (couple) => {
       const eventCount = await Event.countDocuments({ coupleId: couple._id });
-      return { ...couple, eventCount };
+      return { ...couple, eventCount } as PopulatedCouple;
     })
   );
 
