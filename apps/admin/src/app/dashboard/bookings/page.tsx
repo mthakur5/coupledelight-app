@@ -173,8 +173,12 @@ export default async function BookingsPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {bookings.map((booking: PopulatedBooking) => {
-                    const user = typeof booking.userId === 'object' ? booking.userId as PopulatedUser : null;
-                    const event = typeof booking.eventId === 'object' ? booking.eventId as PopulatedEvent : null;
+                    const user = typeof booking.userId !== 'string' && booking.userId !== null
+                      ? (booking.userId as PopulatedUser)
+                      : null;
+                    const event = typeof booking.eventId !== 'string' && booking.eventId !== null
+                      ? (booking.eventId as PopulatedEvent)
+                      : null;
                     
                     return (
                       <tr key={String(booking._id)} className="hover:bg-gray-50 transition-colors">
