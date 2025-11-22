@@ -29,6 +29,12 @@ export default async function DashboardPage() {
                   Dashboard
                 </Link>
                 <Link
+                  href="/search-couples"
+                  className="text-gray-600 hover:text-purple-600"
+                >
+                  Search Couples
+                </Link>
+                <Link
                   href="/events"
                   className="text-gray-600 hover:text-purple-600"
                 >
@@ -78,14 +84,30 @@ export default async function DashboardPage() {
           <div className="bg-gradient-to-br from-pink-500 to-purple-600 p-6 rounded-lg shadow-md text-white">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">
+                Search Couples
+              </h3>
+              <span className="text-3xl">💑</span>
+            </div>
+            <p className="text-sm mb-4 opacity-90">Find and connect with other couples</p>
+            <Link
+              href="/search-couples"
+              className="bg-white text-purple-600 px-4 py-2 rounded-md text-sm font-medium inline-block hover:bg-gray-100 transition-colors"
+            >
+              Start Searching →
+            </Link>
+          </div>
+
+          <div className="bg-gradient-to-br from-indigo-500 to-blue-600 p-6 rounded-lg shadow-md text-white">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">
                 Shop
               </h3>
-              <span className="text-3xl">🛍️</span>
+              <span className="text-3xl">�️</span>
             </div>
             <p className="text-sm mb-4 opacity-90">Browse our exclusive collection</p>
             <Link
               href="/shop"
-              className="bg-white text-purple-600 px-4 py-2 rounded-md text-sm font-medium inline-block hover:bg-gray-100 transition-colors"
+              className="bg-white text-indigo-600 px-4 py-2 rounded-md text-sm font-medium inline-block hover:bg-gray-100 transition-colors"
             >
               Browse Products →
             </Link>

@@ -42,10 +42,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return null;
           }
 
+          // Admins should always be approved, but check status
+          if (user.accountStatus && user.accountStatus !== 'approved') {
+            return null;
+          }
+
           return {
             id: user._id.toString(),
             email: user.email,
             role: user.role,
+            adminRole: user.adminRole,
+            permissions: user.permissions,
           } as NextAuthUser;
         } catch (error) {
           console.error('Auth error:', error);
@@ -59,6 +66,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.adminRole = user.adminRole;
+        token.permissions = user.permissions;
       }
       return token;
     },
@@ -66,6 +75,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        session.user.adminRole = token.adminRole as string | undefined;
+        session.user.permissions = token.permissions;
       }
       return session;
     }

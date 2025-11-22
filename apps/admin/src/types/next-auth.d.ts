@@ -6,6 +6,17 @@ declare module 'next-auth' {
     id: string;
     email: string;
     role: string;
+    adminRole?: string;
+    permissions?: {
+      manageUsers?: boolean;
+      manageProducts?: boolean;
+      manageOrders?: boolean;
+      manageEvents?: boolean;
+      manageCouples?: boolean;
+      manageBookings?: boolean;
+      viewReports?: boolean;
+      manageAdminTeam?: boolean;
+    };
   }
 
   interface Session {
@@ -13,6 +24,17 @@ declare module 'next-auth' {
       id: string;
       email: string;
       role: string;
+      adminRole?: string;
+      permissions?: {
+        manageUsers?: boolean;
+        manageProducts?: boolean;
+        manageOrders?: boolean;
+        manageEvents?: boolean;
+        manageCouples?: boolean;
+        manageBookings?: boolean;
+        viewReports?: boolean;
+        manageAdminTeam?: boolean;
+      };
     };
   }
 }
@@ -21,5 +43,16 @@ declare module 'next-auth/jwt' {
   interface JWT {
     id: string;
     role: string;
+    adminRole?: string;
+    permissions?: {
+      manageUsers?: boolean;
+      manageProducts?: boolean;
+      manageOrders?: boolean;
+      manageEvents?: boolean;
+      manageCouples?: boolean;
+      manageBookings?: boolean;
+      viewReports?: boolean;
+      manageAdminTeam?: boolean;
+    };
   }
 }

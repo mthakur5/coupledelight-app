@@ -1,26 +1,155 @@
-export const runtime = 'nodejs';
+'use client';
 
-import dbConnect from '@/lib/db';
-import User from '@/models/User';
-import { notFound } from 'next/navigation';
+import { use, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-async function getUserById(id: string) {
-  await dbConnect();
-  const user = await User.findById(id).lean();
-  if (user) {
-    const now = new Date();
-    const accountAgeDays = Math.floor((now.getTime() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24));
-    return { ...user, accountAgeDays };
-  }
-  return user;
+interface UserDetail {
+  _id: string;
+  email: string;
+  role: string;
+  provider: string;
+  emailVerified: boolean;
+  accountStatus: string;
+  accountStatusNote?: string;
+  createdAt: string;
+  updatedAt: string;
+  approvedAt?: string;
+  accountAgeDays: number;
 }
 
-export default async function UserDetailPage({ params }: { params: { id: string } }) {
-  const user = await getUserById(params.id);
+export default function UserDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
+  const router = useRouter();
+  const [user, setUser] = useState<UserDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [note, setNote] = useState('');
+  const [showNoteModal, setShowNoteModal] = useState<'approve' | 'reject' | 'suspend' | null>(null);
+
+  useEffect(() => {
+    fetchUser();
+  }, [resolvedParams.id]);
+
+  const fetchUser = async () => {
+    try {
+      const res = await fetch(`/api/users/${resolvedParams.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        const createdDate = new Date(data.createdAt);
+        const now = new Date();
+        const accountAgeDays = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+        setUser({ ...data, accountAgeDays });
+      }
+    } catch (error) {
+      console.error('Error fetching user:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApprove = async () => {
+    if (!confirm('Approve this user?')) return;
+    
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/users/${resolvedParams.id}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note: 'Approved' }),
+      });
+      
+      if (res.ok) {
+        fetchUser();
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!confirm('Reject this user?')) return;
+    
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/users/${resolvedParams.id}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note: 'Rejected' }),
+      });
+      
+      if (res.ok) {
+        fetchUser();
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSuspend = async () => {
+    if (!confirm('Suspend this user?')) return;
+    
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/users/${resolvedParams.id}/suspend`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note: 'Suspended' }),
+      });
+      
+      if (res.ok) {
+        fetchUser();
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('Delete this user?')) return;
+    
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/users/${resolvedParams.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (res.ok) {
+        router.push('/dashboard/users');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading user details...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
-    notFound();
+    return (
+      <div className="text-center py-12">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">User Not Found</h3>
+        <Link href="/dashboard/users" className="text-pink-600 hover:text-pink-900">
+          Back to Users
+        </Link>
+      </div>
+    );
   }
 
   return (
@@ -36,89 +165,147 @@ export default async function UserDetailPage({ params }: { params: { id: string 
 
       {/* Page Header */}
       <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">User Details</h1>
-          <p className="text-gray-600 mt-2">View and manage user information</p>
+        <div className="flex items-center gap-4">
+          <div className="h-20 w-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-3xl">
+            {user.email.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">{user.email}</h1>
+            <div className="flex items-center gap-3 mt-2">
+              <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                user.accountStatus === 'approved'
+                  ? 'bg-green-100 text-green-800'
+                  : user.accountStatus === 'pending'
+                  ? 'bg-yellow-100 text-yellow-800'
+                  : user.accountStatus === 'rejected'
+                  ? 'bg-red-100 text-red-800'
+                  : 'bg-orange-100 text-orange-800'
+              }`}>
+                {user.accountStatus}
+              </span>
+              <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                user.role === 'admin' 
+                  ? 'bg-purple-100 text-purple-800' 
+                  : 'bg-green-100 text-green-800'
+              }`}>
+                {user.role}
+              </span>
+            </div>
+          </div>
         </div>
+        
+        {/* Action Buttons */}
         <div className="flex gap-2">
-          <button className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors">
-            Reset Password
-          </button>
-          <button className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-            Delete User
+          {user.accountStatus === 'pending' && (
+            <>
+              <button
+                onClick={handleApprove}
+                disabled={actionLoading}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+              >
+                Approve
+              </button>
+              <button
+                onClick={handleReject}
+                disabled={actionLoading}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+              >
+                Reject
+              </button>
+            </>
+          )}
+          {user.accountStatus === 'approved' && (
+            <button
+              onClick={handleSuspend}
+              disabled={actionLoading}
+              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
+            >
+              Suspend
+            </button>
+          )}
+          {(user.accountStatus === 'suspended' || user.accountStatus === 'rejected') && (
+            <button
+              onClick={handleApprove}
+              disabled={actionLoading}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+            >
+              Approve
+            </button>
+          )}
+          <button
+            onClick={handleDelete}
+            disabled={actionLoading}
+            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50"
+          >
+            Delete
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* User Info Card */}
+        {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
+          {/* User Information */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">User Information</h2>
             
             <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="flex-shrink-0 h-20 w-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-semibold">
-                  {user.email.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900">{user.email}</h3>
-                  <p className="text-gray-500">User ID: {user._id.toString()}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 pt-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-500">Email Address</label>
-                  <p className="text-gray-900 font-medium">{user.email}</p>
+                  <p className="text-gray-900 font-medium mt-1">{user.email}</p>
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Role</label>
-                  <div className="mt-1">
-                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      user.role === 'admin' 
-                        ? 'bg-purple-100 text-purple-800' 
-                        : 'bg-green-100 text-green-800'
-                    }`}>
-                      {user.role}
-                    </span>
-                  </div>
+                  <label className="text-sm font-medium text-gray-500">User ID</label>
+                  <p className="text-gray-900 font-medium mt-1 text-sm">{user._id}</p>
                 </div>
+              </div>
 
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Role</label>
+                  <p className="text-gray-900 font-medium mt-1 capitalize">{user.role}</p>
+                </div>
+                
                 <div>
                   <label className="text-sm font-medium text-gray-500">Provider</label>
-                  <div className="mt-1">
-                    <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                      {user.provider}
-                    </span>
-                  </div>
+                  <p className="text-gray-900 font-medium mt-1 capitalize">{user.provider}</p>
                 </div>
+              </div>
 
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
                 <div>
                   <label className="text-sm font-medium text-gray-500">Email Verification</label>
-                  <div className="mt-1">
-                    {user.emailVerified ? (
-                      <span className="flex items-center text-sm text-green-600 font-medium">
-                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                        Verified
-                      </span>
-                    ) : (
-                      <span className="flex items-center text-sm text-gray-500 font-medium">
-                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                        </svg>
-                        Not Verified
-                      </span>
-                    )}
-                  </div>
+                  <p className={`font-medium mt-1 ${user.emailVerified ? 'text-green-600' : 'text-gray-500'}`}>
+                    {user.emailVerified ? '✅ Verified' : '❌ Not Verified'}
+                  </p>
                 </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Account Status</label>
+                  <p className={`font-medium mt-1 capitalize ${
+                    user.accountStatus === 'approved' ? 'text-green-600' :
+                    user.accountStatus === 'pending' ? 'text-yellow-600' :
+                    user.accountStatus === 'rejected' ? 'text-red-600' :
+                    'text-orange-600'
+                  }`}>
+                    {user.accountStatus}
+                  </p>
+                </div>
+              </div>
 
+              {user.accountStatusNote && (
+                <div className="pt-4 border-t border-gray-200">
+                  <label className="text-sm font-medium text-gray-500">Status Note</label>
+                  <p className="text-gray-900 mt-1 bg-gray-50 p-3 rounded-lg">{user.accountStatusNote}</p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
                 <div>
                   <label className="text-sm font-medium text-gray-500">Joined Date</label>
-                  <p className="text-gray-900 font-medium">
+                  <p className="text-gray-900 font-medium mt-1">
                     {new Date(user.createdAt).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
@@ -129,7 +316,7 @@ export default async function UserDetailPage({ params }: { params: { id: string 
 
                 <div>
                   <label className="text-sm font-medium text-gray-500">Last Updated</label>
-                  <p className="text-gray-900 font-medium">
+                  <p className="text-gray-900 font-medium mt-1">
                     {new Date(user.updatedAt).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
@@ -138,64 +325,21 @@ export default async function UserDetailPage({ params }: { params: { id: string 
                   </p>
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Edit Role Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Edit Role</h2>
-            <div className="flex items-center gap-4">
-              <select 
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                defaultValue={user.role}
-              >
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-              </select>
-              <button className="px-6 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg hover:from-pink-600 hover:to-purple-700 transition-all font-medium">
-                Update Role
-              </button>
-            </div>
-            <p className="text-sm text-gray-500 mt-2">
-              Changing role will affect user permissions immediately
-            </p>
-          </div>
-
-          {/* Activity Log */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h2>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <div className="text-2xl">🔑</div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">Account Created</p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(user.createdAt).toLocaleString('en-US', {
+              {user.approvedAt && (
+                <div className="pt-4 border-t border-gray-200">
+                  <label className="text-sm font-medium text-gray-500">Approved Date</label>
+                  <p className="text-gray-900 font-medium mt-1">
+                    {new Date(user.approvedAt).toLocaleDateString('en-US', {
                       year: 'numeric',
-                      month: 'short',
+                      month: 'long',
                       day: 'numeric',
                       hour: '2-digit',
                       minute: '2-digit',
                     })}
                   </p>
                 </div>
-              </div>
-              
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <div className="text-2xl">📝</div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">Last Profile Update</p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(user.updatedAt).toLocaleString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -216,29 +360,71 @@ export default async function UserDetailPage({ params }: { params: { id: string 
                 <p className="text-sm text-gray-500">Login Method</p>
                 <p className="text-lg font-semibold text-gray-900 capitalize">{user.provider}</p>
               </div>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Actions</h2>
-            <div className="space-y-2">
-              <button className="w-full px-4 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-2">
-                <span>📧</span> Send Email
-              </button>
-              <button className="w-full px-4 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-2">
-                <span>🔒</span> Suspend Account
-              </button>
-              <button className="w-full px-4 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-2">
-                <span>✉️</span> Verify Email
-              </button>
-              <button className="w-full px-4 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2">
-                <span>🗑️</span> Delete Account
-              </button>
+              <div className="pt-4 border-t border-gray-200">
+                <p className="text-sm text-gray-500">Can Login?</p>
+                <p className={`text-lg font-semibold ${
+                  user.accountStatus === 'approved' && user.emailVerified ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {user.accountStatus === 'approved' && user.emailVerified ? '✅ Yes' : '❌ No'}
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Note Modal */}
+      {showNoteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {showNoteModal === 'approve' ? 'Approve User' :
+               showNoteModal === 'reject' ? 'Reject User' : 'Suspend User'}
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              {showNoteModal === 'approve' 
+                ? 'User will be approved and email will be automatically verified. They can login immediately after approval.'
+                : 'Please provide a reason for this action:'}
+            </p>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder={showNoteModal === 'approve' ? 'Optional note...' : 'Reason (required)...'}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent mb-4"
+              rows={3}
+            />
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => {
+                  setShowNoteModal(null);
+                  setNote('');
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                disabled={actionLoading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (showNoteModal === 'approve') handleApprove();
+                  else if (showNoteModal === 'reject') handleReject();
+                  else handleSuspend();
+                }}
+                disabled={actionLoading}
+                className={`px-4 py-2 rounded-lg text-white ${
+                  showNoteModal === 'approve' 
+                    ? 'bg-green-500 hover:bg-green-600'
+                    : showNoteModal === 'reject'
+                    ? 'bg-red-500 hover:bg-red-600'
+                    : 'bg-orange-500 hover:bg-orange-600'
+                } disabled:opacity-50`}
+              >
+                {actionLoading ? 'Processing...' : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

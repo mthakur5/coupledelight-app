@@ -9,15 +9,71 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { data: session } = useSession();
   const pathname = usePathname();
 
-  const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: '📊' },
-    { name: 'Users', href: '/dashboard/users', icon: '👥' },
-    { name: 'Couples', href: '/dashboard/couples', icon: '💑' },
-    { name: 'Events', href: '/dashboard/events', icon: '🎉' },
-    { name: 'Products', href: '/dashboard/products', icon: '📦' },
-    { name: 'Orders', href: '/dashboard/orders', icon: '🛒' },
-    { name: 'Reports', href: '/dashboard/reports', icon: '📈' },
+  // Role badge component
+  const getRoleBadge = (adminRole?: string) => {
+    if (!adminRole) return null;
+    
+    switch (adminRole) {
+      case 'super_admin':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold bg-purple-100 text-purple-800 rounded">
+            👑 Super Admin
+          </span>
+        );
+      case 'manager':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800 rounded">
+            👨‍💼 Manager
+          </span>
+        );
+      case 'supervisor':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-800 rounded">
+            👨‍🏫 Supervisor
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Check if user is Super Admin (has full access to everything)
+  // Also treat admins without adminRole but with all permissions as super admin (for backward compatibility)
+  const isSuperAdmin =
+    session?.user?.adminRole === 'super_admin' ||
+    (session?.user?.role === 'admin' && !session?.user?.adminRole) ||
+    (session?.user?.role === 'admin' && session?.user?.permissions?.manageAdminTeam === true);
+
+  // Check permissions
+  const hasPermission = (permission: string) => {
+    // Super Admins bypass all permission checks
+    if (isSuperAdmin) return true;
+    
+    if (!session?.user?.permissions) return false;
+    return session.user.permissions[permission as keyof typeof session.user.permissions] === true;
+  };
+
+  // Define all navigation items with permission requirements
+  const allNavigation = [
+    { name: 'Dashboard', href: '/dashboard', icon: '📊', permission: null },
+    { name: 'Users', href: '/dashboard/users', icon: '👥', permission: 'manageUsers' },
+    { name: 'Couples', href: '/dashboard/couples', icon: '💑', permission: 'manageCouples' },
+    { name: 'Events', href: '/dashboard/events', icon: '🎉', permission: 'manageEvents' },
+    { name: 'Products', href: '/dashboard/products', icon: '📦', permission: 'manageProducts' },
+    { name: 'Orders', href: '/dashboard/orders', icon: '🛒', permission: 'manageOrders' },
+    { name: 'Bookings', href: '/dashboard/bookings', icon: '📅', permission: 'manageBookings' },
+    { name: 'Reports', href: '/dashboard/reports', icon: '📈', permission: 'viewReports' },
+    { name: 'Admin Team', href: '/dashboard/admin-team', icon: '👨‍💼', permission: 'manageAdminTeam', highlight: true },
   ];
+
+  // Filter navigation based on permissions
+  // Super Admins see everything, others see based on permissions
+  const navigation = isSuperAdmin
+    ? allNavigation
+    : allNavigation.filter(item => {
+        if (!item.permission) return true;
+        return hasPermission(item.permission);
+      });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -31,9 +87,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               </h1>
             </div>
             <div className="flex items-center gap-4">
-              <div className="text-sm">
+              <div className="text-sm text-right">
                 <p className="font-medium text-gray-900">{session?.user?.email}</p>
-                <p className="text-gray-500">Admin</p>
+                {getRoleBadge(session?.user?.adminRole)}
               </div>
               <button
                 onClick={() => signOut({ callbackUrl: '/login' })}
@@ -60,6 +116,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                       className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                         isActive
                           ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white'
+                          : item.highlight
+                          ? 'text-purple-700 hover:bg-purple-50 border border-purple-200'
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >
@@ -70,6 +128,22 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 );
               })}
             </ul>
+
+            {/* Permission Info */}
+            {session?.user?.adminRole && (
+              <div className="mt-8 p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-100">
+                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+                  Your Access
+                </p>
+                <div className="text-xs text-gray-700">
+                  {session.user.adminRole === 'super_admin' ? (
+                    <p>✓ Full System Access</p>
+                  ) : (
+                    <p>✓ Limited Access</p>
+                  )}
+                </div>
+              </div>
+            )}
           </nav>
         </aside>
 

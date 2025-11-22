@@ -5,50 +5,102 @@ import Couple from '@/models/Couple';
 import User from '@/models/User';
 import Event from '@/models/Event';
 import Link from 'next/link';
-import { Types } from 'mongoose';
 
-interface BaseCouple {
-  _id: Types.ObjectId;
-  user1Id: { email: string; _id: Types.ObjectId } | Types.ObjectId;
-  user2Id: { email: string; _id: Types.ObjectId } | Types.ObjectId;
-  relationshipStartDate: Date;
-  status: string;
-  createdAt: Date;
+interface CoupleProfile {
+  coupleName?: string;
+  partner1Name?: string;
+  partner1Age?: number;
+  partner2Name?: string;
+  partner2Age?: number;
+  location?: string;
+  bio?: string;
+  interests?: string;
+  lookingFor?: string;
 }
 
-interface PopulatedCouple extends BaseCouple {
+interface SerializedCouple {
+  _id: string;
+  user1Email: string;
+  user2Email: string;
+  user1Id: string;
+  user2Id: string;
+  relationshipStartDate: string;
+  anniversaryDate?: string;
+  status: string;
+  createdAt: string;
   eventCount: number;
+  relationshipDays: number;
+  profile?: CoupleProfile;
+}
+
+interface CoupleData {
+  _id: unknown;
+  user1Id?: { _id?: unknown; email?: string; profile?: CoupleProfile };
+  user2Id?: { _id?: unknown; email?: string; profile?: CoupleProfile };
+  relationshipStartDate: Date;
+  anniversaryDate?: Date;
+  status: string;
+  createdAt: Date;
 }
 
 async function getCouplesData() {
   await dbConnect();
   
   const couples = await Couple.find()
-    .populate('user1Id', 'email')
-    .populate('user2Id', 'email')
+    .populate('user1Id', 'email profile')
+    .populate('user2Id', 'email profile')
     .sort({ createdAt: -1 })
-    .lean();
+    .lean() as CoupleData[];
 
-  // Get event counts for each couple
-  const couplesWithEventCounts: PopulatedCouple[] = await Promise.all(
-    couples.map(async (couple) => {
+  // Get event counts and serialize data
+  const now = new Date();
+  const serializedCouples: SerializedCouple[] = await Promise.all(
+    couples.map(async (couple: CoupleData) => {
       const eventCount = await Event.countDocuments({ coupleId: couple._id });
-      return { ...couple, eventCount } as PopulatedCouple;
+      const relationshipStartDate = new Date(couple.relationshipStartDate);
+      const relationshipDays = Math.floor((now.getTime() - relationshipStartDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      // Extract profile from user1Id (assuming couple profile is stored there)
+      const profile = couple.user1Id?.profile || couple.user2Id?.profile;
+      
+      return {
+        _id: String(couple._id),
+        user1Email: couple.user1Id?.email || 'Unknown',
+        user2Email: couple.user2Id?.email || 'Unknown',
+        user1Id: String(couple.user1Id?._id || ''),
+        user2Id: String(couple.user2Id?._id || ''),
+        relationshipStartDate: couple.relationshipStartDate.toISOString(),
+        anniversaryDate: couple.anniversaryDate?.toISOString(),
+        status: couple.status,
+        createdAt: couple.createdAt.toISOString(),
+        eventCount,
+        relationshipDays,
+        profile: profile ? {
+          coupleName: profile.coupleName,
+          partner1Name: profile.partner1Name,
+          partner1Age: profile.partner1Age,
+          partner2Name: profile.partner2Name,
+          partner2Age: profile.partner2Age,
+          location: profile.location,
+          bio: profile.bio,
+          interests: profile.interests,
+          lookingFor: profile.lookingFor,
+        } : undefined,
+      };
     })
   );
 
-  const totalCouples = couples.length;
-  const activeCouples = couples.filter((c) => c.status === 'active').length;
+  const totalCouples = serializedCouples.length;
+  const activeCouples = serializedCouples.filter((c) => c.status === 'active').length;
   const totalEvents = await Event.countDocuments();
   
-  const now = new Date();
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const thisMonthCouples = couples.filter(
+  const thisMonthCouples = serializedCouples.filter(
     (c) => new Date(c.createdAt) >= firstDayOfMonth
   ).length;
 
   return {
-    couples: couplesWithEventCounts,
+    couples: serializedCouples,
     stats: {
       totalCouples,
       activeCouples,
@@ -67,7 +119,7 @@ export default async function CouplesPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Couples Management</h1>
-          <p className="text-gray-600 mt-2">View and manage all registered couples</p>
+          <p className="text-gray-600 mt-2">View and manage all registered couples with detailed profiling</p>
         </div>
         <div className="text-sm text-gray-600">
           Total Couples: <span className="font-semibold text-gray-900">{stats.totalCouples}</span>
@@ -90,7 +142,8 @@ export default async function CouplesPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Active Couples</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{stats.activeCouples}</p>
+              <p className="text-3xl font-bold text-green-600 mt-2">{stats.activeCouples}</p>
+              <p className="text-xs text-gray-500 mt-1">Currently engaging</p>
             </div>
             <div className="text-4xl">✅</div>
           </div>
@@ -111,9 +164,33 @@ export default async function CouplesPage() {
             <div>
               <p className="text-sm font-medium text-gray-600">This Month</p>
               <p className="text-3xl font-bold text-gray-900 mt-2">{stats.thisMonthCouples}</p>
+              <p className="text-xs text-gray-500 mt-1">New couples</p>
             </div>
             <div className="text-4xl">📅</div>
           </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+        <div className="flex flex-wrap gap-4">
+          <input
+            type="search"
+            placeholder="Search by couple name or email..."
+            className="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+          />
+          <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="pending">Pending</option>
+          </select>
+          <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+            <option value="">All Locations</option>
+            {Array.from(new Set(couples.filter(c => c.profile?.location).map(c => c.profile!.location))).map(location => (
+              <option key={location} value={location}>{location}</option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -132,16 +209,19 @@ export default async function CouplesPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Couple
+                      Couple Profile
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Relationship Since
+                      Location
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Relationship
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Events
+                      Activity
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
@@ -150,48 +230,77 @@ export default async function CouplesPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {couples.map((couple) => (
-                    <tr key={couple._id.toString()} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                    <tr key={couple._id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4">
                         <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                            {(typeof couple.user1Id === 'object' && couple.user1Id && 'email' in couple.user1Id)
-                              ? couple.user1Id.email.charAt(0).toUpperCase()
-                              : '?'}
+                          <div className="flex-shrink-0 h-12 w-12 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-lg relative">
+                            {couple.profile?.coupleName?.charAt(0).toUpperCase() || couple.user1Email.charAt(0).toUpperCase()}
+                            {couple.status === 'active' && (
+                              <span className="absolute -top-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></span>
+                            )}
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {(typeof couple.user1Id === 'object' && couple.user1Id && 'email' in couple.user1Id) ? couple.user1Id.email : 'Unknown'} & {(typeof couple.user2Id === 'object' && couple.user2Id && 'email' in couple.user2Id) ? couple.user2Id.email : 'Unknown'}
+                            <div className="text-sm font-bold text-gray-900">
+                              {couple.profile?.coupleName || `${couple.user1Email.split('@')[0]} & ${couple.user2Email.split('@')[0]}`}
                             </div>
-                            <div className="text-sm text-gray-500">ID: {couple._id.toString().slice(-8)}</div>
+                            {couple.profile?.partner1Name && couple.profile?.partner2Name && (
+                              <div className="text-sm text-gray-600">
+                                {couple.profile.partner1Name} ({couple.profile.partner1Age}) & {couple.profile.partner2Name} ({couple.profile.partner2Age})
+                              </div>
+                            )}
+                            <div className="text-xs text-gray-500">
+                              {couple.user1Email} & {couple.user2Email}
+                            </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(couple.relationshipStartDate).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                        })}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {couple.profile?.location ? (
+                          <div className="flex items-center text-sm text-gray-900">
+                            <span className="mr-1">📍</span>
+                            {couple.profile.location}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-400">Not set</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {new Date(couple.relationshipStartDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {couple.relationshipDays} days together
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                             couple.status === 'active'
                               ? 'bg-green-100 text-green-800'
+                              : couple.status === 'pending'
+                              ? 'bg-yellow-100 text-yellow-800'
                               : 'bg-gray-100 text-gray-800'
                           }`}
                         >
                           {couple.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {couple.eventCount} events
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{couple.eventCount} events</div>
+                        {couple.profile?.lookingFor && (
+                          <div className="text-xs text-gray-500">
+                            Looking for: {couple.profile.lookingFor}
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <Link href={`/dashboard/couples/${couple._id.toString()}`} className="text-pink-600 hover:text-pink-900 mr-4">
-                          View
+                        <Link href={`/dashboard/couples/${couple._id}`} className="text-pink-600 hover:text-pink-900 mr-4">
+                          View Profile
                         </Link>
-                        <button className="text-red-600 hover:text-red-900">Delete</button>
                       </td>
                     </tr>
                   ))}

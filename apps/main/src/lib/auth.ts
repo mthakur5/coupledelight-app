@@ -10,6 +10,7 @@ interface ExtendedUser extends NextAuthUser {
   id: string;
   role: string;
   emailVerified: boolean;
+  accountStatus: string;
 }
 
 export const authConfig: NextAuthConfig = {
@@ -42,11 +43,27 @@ export const authConfig: NextAuthConfig = {
           throw new Error("Invalid email or password");
         }
 
+        // Check if account is approved
+        if (user.accountStatus !== 'approved') {
+          const statusMessages = {
+            pending: 'Your account is pending admin approval. Please wait for approval.',
+            rejected: 'Your account has been rejected. Please contact support.',
+            suspended: 'Your account has been suspended. Please contact support.',
+          };
+          throw new Error(statusMessages[user.accountStatus as keyof typeof statusMessages] || 'Account not approved');
+        }
+
+        // Check if email is verified
+        if (!user.emailVerified) {
+          throw new Error('Please verify your email before logging in. Check your inbox for verification link.');
+        }
+
         return {
           id: user._id.toString(),
           email: user.email,
           role: user.role,
           emailVerified: user.emailVerified,
+          accountStatus: user.accountStatus,
         };
       },
     }),
@@ -69,15 +86,22 @@ export const authConfig: NextAuthConfig = {
       if (account?.provider === "google" || account?.provider === "facebook") {
         await dbConnect();
 
-        const existingUser = await User.findOne({ email: user.email });
+        let existingUser = await User.findOne({ email: user.email });
 
         if (!existingUser) {
-          await User.create({
+          // Create new user with pending status
+          existingUser = await User.create({
             email: user.email,
             emailVerified: true,
             provider: account.provider,
             role: "user",
+            accountStatus: "pending",
           });
+        }
+
+        // Check if account is approved
+        if (existingUser.accountStatus !== 'approved') {
+          return false; // Prevent login
         }
       }
 
@@ -89,6 +113,7 @@ export const authConfig: NextAuthConfig = {
         token.id = extendedUser.id;
         token.role = extendedUser.role;
         token.emailVerified = extendedUser.emailVerified;
+        token.accountStatus = extendedUser.accountStatus;
       }
       return token;
     },
@@ -102,6 +127,7 @@ export const authConfig: NextAuthConfig = {
             id: token.id as string,
             role: token.role as string,
             emailVerified: token.emailVerified as boolean,
+            accountStatus: token.accountStatus as string,
           },
         };
       }
