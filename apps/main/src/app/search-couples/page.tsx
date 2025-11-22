@@ -164,24 +164,25 @@ export default function SearchCouplesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Link
-            href="/dashboard"
-            className="text-pink-600 hover:text-pink-700 flex items-center gap-2 mb-4"
-          >
-            <span>←</span> Back to Dashboard
-          </Link>
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Search Couples</h1>
-          <p className="text-gray-600">Find and connect with other couples in your area</p>
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-purple-50 to-pink-100 relative">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-pink-300/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/3 left-0 w-96 h-96 bg-purple-300/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/3 w-96 h-96 bg-rose-300/20 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="container mx-auto px-4 py-6 relative z-10">
+        {/* Simple Header */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Search Couples</h1>
+          <p className="text-gray-600">Find and connect with other couples</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Filters Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-lg p-6 sticky top-4">
+            <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-6 sticky top-20">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-800">Filters</h2>
                 <button
@@ -201,21 +202,21 @@ export default function SearchCouplesPage() {
                     placeholder="City"
                     value={filters.city}
                     onChange={(e) => handleFilterChange('city', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg mb-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-pink-200 rounded-lg mb-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-900"
                   />
                   <input
                     type="text"
                     placeholder="State"
                     value={filters.state}
                     onChange={(e) => handleFilterChange('state', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg mb-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-pink-200 rounded-lg mb-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-900"
                   />
                   <input
                     type="text"
                     placeholder="Country"
                     value={filters.country}
                     onChange={(e) => handleFilterChange('country', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-900"
                   />
                 </div>
 
@@ -228,7 +229,7 @@ export default function SearchCouplesPage() {
                       placeholder="Min"
                       value={filters.minAge}
                       onChange={(e) => handleFilterChange('minAge', e.target.value)}
-                      className="w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                      className="w-1/2 px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-900"
                       min="18"
                     />
                     <input
@@ -236,7 +237,7 @@ export default function SearchCouplesPage() {
                       placeholder="Max"
                       value={filters.maxAge}
                       onChange={(e) => handleFilterChange('maxAge', e.target.value)}
-                      className="w-1/2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                      className="w-1/2 px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-900"
                       min="18"
                     />
                   </div>
@@ -392,7 +393,7 @@ export default function SearchCouplesPage() {
                 <p className="text-gray-600">Searching...</p>
               </div>
             ) : couples.length === 0 ? (
-              <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+              <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-12 text-center">
                 <p className="text-gray-600 text-lg">No couples found matching your criteria</p>
                 <p className="text-gray-500 mt-2">Try adjusting your filters</p>
               </div>
@@ -401,7 +402,7 @@ export default function SearchCouplesPage() {
                 {couples.map((couple) => (
                   <div
                     key={couple._id}
-                    className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-200"
+                    className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-200 hover:scale-[1.02]"
                   >
                     <div className="flex items-start gap-4">
                       {/* Profile Picture */}
@@ -514,7 +515,7 @@ export default function SearchCouplesPage() {
                 <button
                   onClick={() => handlePageChange(pagination.page - 1)}
                   disabled={pagination.page === 1}
-                  className="px-4 py-2 bg-white rounded-lg shadow hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  className="px-4 py-2 bg-white/90 backdrop-blur-sm rounded-lg shadow hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                 >
                   Previous
                 </button>
@@ -537,8 +538,8 @@ export default function SearchCouplesPage() {
                           onClick={() => handlePageChange(page)}
                           className={`px-4 py-2 rounded-lg transition-all duration-200 ${
                             pagination.page === page
-                              ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white'
-                              : 'bg-white shadow hover:shadow-md'
+                              ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg'
+                              : 'bg-white/90 backdrop-blur-sm shadow hover:shadow-md'
                           }`}
                         >
                           {page}
@@ -550,7 +551,7 @@ export default function SearchCouplesPage() {
                 <button
                   onClick={() => handlePageChange(pagination.page + 1)}
                   disabled={pagination.page === pagination.pages}
-                  className="px-4 py-2 bg-white rounded-lg shadow hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  className="px-4 py-2 bg-white/90 backdrop-blur-sm rounded-lg shadow hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                 >
                   Next
                 </button>

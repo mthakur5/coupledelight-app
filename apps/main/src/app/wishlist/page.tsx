@@ -1,7 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import LogoutButton from "@/components/LogoutButton";
 
 export default async function WishlistPage() {
   const session = await auth();
@@ -12,53 +11,6 @@ export default async function WishlistPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-8">
-              <Link href="/">
-                <h1 className="text-2xl font-bold text-purple-600">
-                  CoupleDelight
-                </h1>
-              </Link>
-              <div className="hidden md:flex gap-6">
-                <Link
-                  href="/dashboard"
-                  className="text-gray-600 hover:text-purple-600"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/events"
-                  className="text-gray-600 hover:text-purple-600"
-                >
-                  Events
-                </Link>
-                <Link
-                  href="/wishlist"
-                  className="text-purple-600 font-medium"
-                >
-                  Wishlist
-                </Link>
-                <Link
-                  href="/shop"
-                  className="text-gray-600 hover:text-purple-600"
-                >
-                  Shop
-                </Link>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-gray-700 text-sm">
-                {session.user?.email}
-              </span>
-              <LogoutButton />
-            </div>
-          </div>
-        </div>
-      </nav>
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">

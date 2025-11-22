@@ -127,47 +127,6 @@ export default function CoupleEventsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-8">
-              <Link href="/">
-                <h1 className="text-2xl font-bold text-purple-600">
-                  CoupleDelight
-                </h1>
-              </Link>
-              <div className="hidden md:flex gap-6">
-                <Link
-                  href="/dashboard"
-                  className="text-gray-600 hover:text-purple-600"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/couple-events"
-                  className="text-purple-600 font-medium"
-                >
-                  Couple Events
-                </Link>
-                <Link
-                  href="/events"
-                  className="text-gray-600 hover:text-purple-600"
-                >
-                  Experiences
-                </Link>
-                <Link
-                  href="/shop"
-                  className="text-gray-600 hover:text-purple-600"
-                >
-                  Shop
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">

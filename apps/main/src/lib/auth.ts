@@ -13,7 +13,7 @@ interface ExtendedUser extends NextAuthUser {
   accountStatus: string;
 }
 
-export const authConfig: NextAuthConfig = {
+const authConfig: NextAuthConfig = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -139,8 +139,10 @@ export const authConfig: NextAuthConfig = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
-  trustHost: true, // Required for Vercel deployments
+  trustHost: true,
   debug: process.env.NODE_ENV === 'development',
+  basePath: '/api/auth',
 };
 
 export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
+export { authConfig };

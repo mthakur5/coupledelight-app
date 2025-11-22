@@ -97,37 +97,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-red-50">
-      <nav className="bg-white shadow-sm border-b border-purple-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-8">
-              <Link href="/">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  CoupleDelight
-                </h1>
-              </Link>
-              <div className="hidden md:flex gap-6">
-                <Link href="/dashboard" className="text-gray-600 hover:text-purple-600 transition-colors">
-                  Dashboard
-                </Link>
-                <Link href="/events" className="text-gray-600 hover:text-purple-600 transition-colors">
-                  Events
-                </Link>
-                <Link href="/shop" className="text-gray-600 hover:text-purple-600 transition-colors">
-                  Shop
-                </Link>
-                <Link href="/profile" className="text-purple-600 font-medium">
-                  Profile
-                </Link>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-gray-700 text-sm">{session?.user?.email}</span>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8 flex justify-between items-center">
           <div>

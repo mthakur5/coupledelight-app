@@ -5,8 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
 import { ShoppingBag, Search } from 'lucide-react';
-import { useSession } from 'next-auth/react';
-import LogoutButton from '@/components/LogoutButton';
 
 interface Product {
   _id: string;
@@ -40,7 +38,6 @@ export default function ShopPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [mounted, setMounted] = useState(false);
   const { addToCart, cartCount, openCart } = useCart();
-  const { data: session } = useSession();
 
   useEffect(() => {
     setMounted(true);
@@ -82,89 +79,52 @@ export default function ShopPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top Header */}
-      <div className="bg-gradient-to-r from-pink-600 to-purple-600 text-white py-2">
-        <div className="max-w-7xl mx-auto px-4 flex justify-between items-center text-sm">
-          <p>🎁 Free Shipping on Orders Over ₹1000</p>
-          <Link href="/dashboard" className="hover:text-pink-200 transition-colors">
-            ← Back to Dashboard
-          </Link>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-purple-50 to-pink-100 relative">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-pink-300/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 right-0 w-96 h-96 bg-purple-300/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-1/3 w-96 h-96 bg-rose-300/20 rounded-full blur-3xl"></div>
       </div>
-
-      {/* Main Header */}
-      <header className="bg-white border-b sticky top-0 z-30 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <Link href="/shop" className="text-2xl font-bold text-pink-600 flex items-center gap-2">
-              <ShoppingBag className="w-7 h-7" />
-              <span className="hidden sm:inline">CoupleDelight Shop</span>
-              <span className="sm:hidden">Shop</span>
-            </Link>
-            
-            {/* Search Bar - Desktop */}
-            <div className="hidden md:flex flex-1 max-w-2xl mx-8">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              {/* Cart Button */}
-              <button
-                onClick={openCart}
-                className="relative p-3 hover:bg-gray-100 rounded-full transition-colors"
-                aria-label="Open cart"
-              >
-                <ShoppingBag className="w-6 h-6 text-gray-700" />
-                {mounted && cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-pink-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                    {cartCount}
-                  </span>
-                )}
-              </button>
-              
-              {/* Logout Button */}
-              {session && <LogoutButton />}
-            </div>
+      <main className="max-w-7xl mx-auto px-4 py-6 relative z-10">
+        {/* Header with Search and Cart */}
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <div className="relative flex-1 max-w-2xl">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-rose-400" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-white/80 backdrop-blur-sm border border-pink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:bg-white"
+            />
           </div>
-
-          {/* Search Bar - Mobile */}
-          <div className="md:hidden mt-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-              />
-            </div>
-          </div>
+          
+          <button
+            onClick={openCart}
+            className="relative p-3 bg-white/80 backdrop-blur-sm hover:bg-white rounded-lg transition-colors border border-pink-200"
+            aria-label="Open cart"
+          >
+            <ShoppingBag className="w-6 h-6 text-gray-700" />
+            {mounted && cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
+          </button>
         </div>
-      </header>
 
-      {/* Category Navigation */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+        {/* Category Filters */}
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-2">
             {categories.map((cat) => (
               <button
                 key={cat.value}
                 onClick={() => setSelectedCategory(cat.value)}
-                className={`px-4 py-2 rounded-full whitespace-nowrap transition-colors font-medium ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   selectedCategory === cat.value
-                    ? 'bg-pink-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg'
+                    : 'bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white border border-pink-200'
                 }`}
               >
                 {cat.label}
@@ -172,31 +132,13 @@ export default function ShopPage() {
             ))}
           </div>
         </div>
-      </div>
-
-      {/* Featured Banner */}
-      <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Explore Our Collection</h1>
-              <p className="text-lg opacity-90">
-                {selectedCategory === 'all' 
-                  ? `${products.length} Products Available` 
-                  : `${products.length} ${categories.find(c => c.value === selectedCategory)?.label || ''}`}
-              </p>
-            </div>
-            <div className="hidden md:block text-6xl">🛍️</div>
-          </div>
-        </div>
-      </div>
 
       {/* Products Grid */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <div>
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse">
+              <div key={i} className="bg-white/80 backdrop-blur-sm rounded-lg shadow-md overflow-hidden animate-pulse">
                 <div className="w-full h-64 bg-gray-200" />
                 <div className="p-4 space-y-3">
                   <div className="h-4 bg-gray-200 rounded w-3/4" />
@@ -215,7 +157,7 @@ export default function ShopPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (
-              <div key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow group">
+              <div key={product._id} className="bg-white/90 backdrop-blur-sm rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all group hover:scale-105">
                 <Link href={`/shop/products/${product._id}`}>
                   <div className="relative w-full h-64 bg-gray-100 overflow-hidden">
                     {product.images[0] ? (
@@ -274,6 +216,7 @@ export default function ShopPage() {
             ))}
           </div>
         )}
+      </div>
       </main>
     </div>
   );

@@ -14,14 +14,6 @@ export default function Home() {
   const router = useRouter();
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  
-  // Force refresh session on mount and when coming back to page
-  useEffect(() => {
-    const refreshSession = async () => {
-      await update();
-    };
-    refreshSession();
-  }, [update]);
 
   // Listen for storage events (logout from other tabs)
   useEffect(() => {
@@ -34,7 +26,7 @@ export default function Home() {
     
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [update, router]);
+  }, []); // Empty dependency array - update and router are stable
 
   const openLogin = () => {
     setShowRegister(false);

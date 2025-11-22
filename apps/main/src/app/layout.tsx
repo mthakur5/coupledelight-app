@@ -4,6 +4,7 @@ import "./globals.css";
 import SessionProvider from "@/components/providers/SessionProvider";
 import CartProvider from "@/components/providers/CartProvider";
 import CartPopupWrapper from "@/components/CartPopupWrapper";
+import Navbar from "@/components/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,6 +42,7 @@ export default function RootLayout({
       >
         <SessionProvider>
           <CartProvider>
+            <Navbar />
             {children}
             <CartPopupWrapper />
           </CartProvider>

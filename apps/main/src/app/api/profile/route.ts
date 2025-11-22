@@ -64,44 +64,63 @@ export async function PUT(request: NextRequest) {
 
     // Update profile if provided
     if (profile) {
-      user.profile = {
-        ...user.profile,
+      console.log('Updating profile with:', JSON.stringify(profile, null, 2));
+      
+      // Get current profile as plain object
+      const currentProfile = user.profile ? JSON.parse(JSON.stringify(user.profile)) : {};
+      
+      // Merge with new profile data
+      const updatedProfile = {
+        ...currentProfile,
         ...profile,
       };
+      
+      console.log('Merged profile:', JSON.stringify(updatedProfile, null, 2));
+      
+      // Set the profile
+      user.set('profile', updatedProfile);
     }
 
     // Update preferences if provided
     if (preferences) {
-      user.preferences = {
-        ...user.preferences,
+      console.log('Updating preferences with:', JSON.stringify(preferences, null, 2));
+      
+      const currentPreferences = user.preferences ? JSON.parse(JSON.stringify(user.preferences)) : {};
+      
+      const updatedPreferences = {
+        ...currentPreferences,
         emailNotifications: {
-          ...user.preferences?.emailNotifications,
-          ...preferences.emailNotifications,
+          ...(currentPreferences.emailNotifications || {}),
+          ...(preferences.emailNotifications || {}),
         },
         smsNotifications: {
-          ...user.preferences?.smsNotifications,
-          ...preferences.smsNotifications,
+          ...(currentPreferences.smsNotifications || {}),
+          ...(preferences.smsNotifications || {}),
         },
         pushNotifications: {
-          ...user.preferences?.pushNotifications,
-          ...preferences.pushNotifications,
+          ...(currentPreferences.pushNotifications || {}),
+          ...(preferences.pushNotifications || {}),
         },
         privacy: {
-          ...user.preferences?.privacy,
-          ...preferences.privacy,
+          ...(currentPreferences.privacy || {}),
+          ...(preferences.privacy || {}),
         },
         eventPreferences: {
-          ...user.preferences?.eventPreferences,
-          ...preferences.eventPreferences,
+          ...(currentPreferences.eventPreferences || {}),
+          ...(preferences.eventPreferences || {}),
         },
-        language: preferences.language || user.preferences?.language,
-        theme: preferences.theme || user.preferences?.theme,
-        currency: preferences.currency || user.preferences?.currency,
-        timezone: preferences.timezone || user.preferences?.timezone,
+        language: preferences.language || currentPreferences.language,
+        theme: preferences.theme || currentPreferences.theme,
+        currency: preferences.currency || currentPreferences.currency,
+        timezone: preferences.timezone || currentPreferences.timezone,
       };
+      
+      user.set('preferences', updatedPreferences);
     }
 
+    console.log('Saving user to database...');
     await user.save();
+    console.log('User saved successfully');
 
     // Return updated user without password
     const updatedUser = await User.findById(session.user.id).select('-password');
