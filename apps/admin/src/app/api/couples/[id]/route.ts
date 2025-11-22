@@ -8,7 +8,7 @@ import { auth } from '@/lib/auth';
 // Get single couple
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -22,7 +22,8 @@ export async function GET(
 
     await dbConnect();
 
-    const couple = await Couple.findById(params.id)
+    const { id } = await params;
+    const couple = await Couple.findById(id)
       .populate('user1Id', 'email')
       .populate('user2Id', 'email')
       .lean();
@@ -47,7 +48,7 @@ export async function GET(
 // Update couple
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -61,7 +62,8 @@ export async function PATCH(
 
     await dbConnect();
 
-    const couple = await Couple.findById(params.id);
+    const { id } = await params;
+    const couple = await Couple.findById(id);
     if (!couple) {
       return NextResponse.json(
         { error: 'Couple not found' },
@@ -132,7 +134,7 @@ export async function PATCH(
 // Delete couple
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -146,7 +148,8 @@ export async function DELETE(
 
     await dbConnect();
 
-    const couple = await Couple.findById(params.id);
+    const { id } = await params;
+    const couple = await Couple.findById(id);
     if (!couple) {
       return NextResponse.json(
         { error: 'Couple not found' },
@@ -154,7 +157,7 @@ export async function DELETE(
       );
     }
 
-    await Couple.deleteOne({ _id: params.id });
+    await Couple.deleteOne({ _id: id });
 
     return NextResponse.json({
       message: 'Couple deleted successfully',
