@@ -7,14 +7,14 @@ interface AdminMember {
   email: string;
   adminRole: string;
   permissions: {
-    manageUsers: boolean;
-    manageProducts: boolean;
-    manageOrders: boolean;
-    manageEvents: boolean;
-    manageCouples: boolean;
-    manageBookings: boolean;
-    viewReports: boolean;
-    manageAdminTeam: boolean;
+    manageUsers?: boolean;
+    manageProducts?: boolean;
+    manageOrders?: boolean;
+    manageEvents?: boolean;
+    manageCouples?: boolean;
+    manageBookings?: boolean;
+    viewReports?: boolean;
+    manageAdminTeam?: boolean;
   };
   accountStatus: string;
   createdAt: string;
