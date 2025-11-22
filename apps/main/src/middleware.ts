@@ -3,7 +3,19 @@ import type { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 
 // Define protected and auth routes
-const protectedRoutes = ["/dashboard", "/profile", "/events", "/wishlist", "/shop"];
+const protectedRoutes = [
+  "/dashboard",
+  "/profile",
+  "/events",
+  "/wishlist",
+  "/shop",
+  "/search-couples",
+  "/couples",
+  "/my-orders",
+  "/my-bookings",
+  "/feed",
+  "/couple-events"
+];
 const authRoutes = ["/login", "/register"];
 
 export async function middleware(request: NextRequest) {
