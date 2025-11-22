@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 // GET - Fetch a single couple's profile
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -21,7 +21,7 @@ export async function GET(
 
     await dbConnect();
 
-    const { id } = params;
+    const { id } = await params;
 
     // Validate MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
