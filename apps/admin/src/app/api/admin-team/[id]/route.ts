@@ -9,7 +9,7 @@ import bcrypt from 'bcryptjs';
 // Get single admin team member
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -31,7 +31,8 @@ export async function GET(
       );
     }
 
-    const adminMember = await User.findOne({ _id: params.id, role: 'admin' })
+    const { id } = await params;
+    const adminMember = await User.findOne({ _id: id, role: 'admin' })
       .select('-password')
       .populate('addedBy', 'email')
       .lean();
@@ -56,7 +57,7 @@ export async function GET(
 // Update admin team member permissions
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -89,7 +90,8 @@ export async function PATCH(
     const body = await req.json();
     const { adminRole, permissions, password } = body;
 
-    const adminMember = await User.findOne({ _id: params.id, role: 'admin' });
+    const { id } = await params;
+    const adminMember = await User.findOne({ _id: id, role: 'admin' });
     if (!adminMember) {
       return NextResponse.json(
         { error: 'Admin member not found' },
@@ -180,7 +182,7 @@ export async function PATCH(
 // Delete admin team member
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -210,7 +212,8 @@ export async function DELETE(
       );
     }
 
-    const adminMember = await User.findOne({ _id: params.id, role: 'admin' });
+    const { id } = await params;
+    const adminMember = await User.findOne({ _id: id, role: 'admin' });
     if (!adminMember) {
       return NextResponse.json(
         { error: 'Admin member not found' },
@@ -241,7 +244,7 @@ export async function DELETE(
       }
     }
 
-    await User.deleteOne({ _id: params.id });
+    await User.deleteOne({ _id: id });
 
     return NextResponse.json({
       message: 'Admin member deleted successfully',
