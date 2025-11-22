@@ -1,5 +1,5 @@
 [build]
-  base = "apps/admin"
+  base = "apps/main"
   command = "npm run build"
   publish = ".next"
 
