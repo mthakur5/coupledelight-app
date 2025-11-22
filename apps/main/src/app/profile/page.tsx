@@ -132,7 +132,7 @@ export default function ProfilePage() {
         <div className="mb-8 flex justify-between items-center">
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              {profile.coupleName || 'Your Profile'}
+              {(profile.coupleName as string) || 'Your Profile'}
             </h1>
             <p className="text-gray-600 mt-2">
               {profile.lifestyleType ? `${String(profile.lifestyleType).charAt(0).toUpperCase() + String(profile.lifestyleType).slice(1)} Couple` : 'Complete your profile to get started'}
