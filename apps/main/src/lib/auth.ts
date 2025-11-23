@@ -111,6 +111,7 @@ const authConfig: NextAuthConfig = {
       if (user) {
         const extendedUser = user as ExtendedUser;
         token.id = extendedUser.id;
+        token.email = extendedUser.email;
         token.role = extendedUser.role;
         token.emailVerified = extendedUser.emailVerified;
         token.accountStatus = extendedUser.accountStatus;
@@ -125,6 +126,7 @@ const authConfig: NextAuthConfig = {
           user: {
             ...session.user,
             id: token.id as string,
+            email: token.email as string,
             role: token.role as string,
             emailVerified: token.emailVerified as boolean,
             accountStatus: token.accountStatus as string,
