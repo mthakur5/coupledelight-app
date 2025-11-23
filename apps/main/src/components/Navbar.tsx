@@ -46,18 +46,10 @@ export default function Navbar() {
     return null;
   }
   
-  // Don't show if unauthenticated
-  if (status === 'unauthenticated') {
-    return null;
-  }
-  
-  // Don't show if loading and no session yet
+  // The middleware already protects authenticated routes, so if we're here and not on
+  // homepage/login/register, we should show the navbar
+  // Only hide if explicitly loading with no session
   if (status === 'loading' && !session) {
-    return null;
-  }
-  
-  // Don't show if no session
-  if (!session) {
     return null;
   }
 
