@@ -7,10 +7,14 @@ import User from '@/models/User';
 export async function GET() {
   try {
     const session = await auth();
+    
+    console.log('Profile API - Session:', JSON.stringify(session, null, 2));
+    console.log('Profile API - User ID:', session?.user?.id);
 
     if (!session?.user?.id) {
+      console.error('Profile API - No user ID in session');
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Unauthorized - No user ID in session' },
         { status: 401 }
       );
     }
