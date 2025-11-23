@@ -121,15 +121,17 @@ const authConfig: NextAuthConfig = {
     async session({ session, token }) {
       if (session.user) {
         // Safely extend session user with additional properties
+        // Handle both old and new token structures gracefully
         return {
           ...session,
           user: {
             ...session.user,
-            id: token.id as string,
-            email: token.email as string,
-            role: token.role as string,
-            emailVerified: token.emailVerified as boolean,
-            accountStatus: token.accountStatus as string,
+            // Only add properties if they exist in token
+            ...(token.id && { id: token.id as string }),
+            ...(token.email && { email: token.email as string }),
+            ...(token.role && { role: token.role as string }),
+            ...(token.emailVerified !== undefined && { emailVerified: token.emailVerified as boolean }),
+            ...(token.accountStatus && { accountStatus: token.accountStatus as string }),
           },
         };
       }
