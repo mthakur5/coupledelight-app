@@ -50,25 +50,25 @@ export default function Navbar() {
     return null;
   }
   
-  // If we're still loading and have no session, don't render yet
-  if (status === 'loading' && !session) {
-    console.log('Still loading, no session yet');
-    return null;
-  }
-  
-  // If explicitly unauthenticated, don't show
+  // Don't show if unauthenticated
   if (status === 'unauthenticated') {
-    console.log('Unauthenticated status');
+    console.log('Hiding navbar: unauthenticated status');
     return null;
   }
   
-  // If we have a session OR we're authenticated, show the navbar
-  // This handles the case where status might be 'loading' but session exists
-  if (!session && status !== 'authenticated') {
-    console.log('No session and not authenticated', { status });
+  // Don't show if loading and no session yet
+  if (status === 'loading' && !session) {
+    console.log('Hiding navbar: still loading, no session');
     return null;
   }
   
+  // Don't show if no session (even if status is authenticated, we need session data)
+  if (!session) {
+    console.log('Hiding navbar: no session data');
+    return null;
+  }
+  
+  // At this point we have a session, show the navbar
   console.log('Showing full navbar for user:', session?.user?.email);
 
   const isActive = (path: string) => {
