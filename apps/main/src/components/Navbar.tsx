@@ -123,7 +123,7 @@ export default function Navbar() {
                 className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors"
               >
                 <span className="text-sm font-medium truncate max-w-[150px]">
-                  {session.user?.name || session.user?.email}
+                  {session?.user?.name || session?.user?.email || 'Guest'}
                 </span>
                 <svg
                   className={`w-4 h-4 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`}
@@ -228,7 +228,7 @@ export default function Navbar() {
               ))}
               <div className="pt-2 px-4">
                 <div className="text-white text-sm mb-2 opacity-75">
-                  {session.user?.name || session.user?.email}
+                  {session?.user?.name || session?.user?.email || 'Guest'}
                 </div>
               </div>
             </div>
