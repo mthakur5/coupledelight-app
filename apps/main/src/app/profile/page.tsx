@@ -25,11 +25,10 @@ export default function ProfilePage() {
   const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
-    // Middleware already protects this route, so just fetch data
-    if (status === 'authenticated') {
-      fetchProfile();
-    }
-  }, [status]);
+    // Middleware already protects this route, so just fetch data when component mounts
+    // Don't wait for status to be 'authenticated' as it may cause delays
+    fetchProfile();
+  }, []); // Only run once on mount
 
   const fetchProfile = async () => {
     try {

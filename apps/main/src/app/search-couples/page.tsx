@@ -82,11 +82,9 @@ export default function SearchCouplesPage() {
   });
 
   useEffect(() => {
-    // Middleware already protects this route, so just fetch data when ready
-    if (status === 'authenticated') {
-      searchCouples();
-    }
-  }, [status, filters.page]);
+    // Middleware already protects this route, so just fetch data when component mounts
+    searchCouples();
+  }, [filters.page]); // Fetch when page changes
 
   const searchCouples = async () => {
     setLoading(true);

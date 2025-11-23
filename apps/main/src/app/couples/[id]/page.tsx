@@ -72,11 +72,11 @@ export default function CoupleProfilePage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // Middleware already protects this route, so just fetch data when ready
-    if (status === 'authenticated' && coupleId) {
+    // Middleware already protects this route, so just fetch data when component mounts
+    if (coupleId) {
       fetchCoupleProfile();
     }
-  }, [status, coupleId]);
+  }, [coupleId]); // Fetch when coupleId is available
 
   const fetchCoupleProfile = async () => {
     setLoading(true);
