@@ -103,12 +103,16 @@ export default function Navbar() {
           <div className="flex items-center space-x-3">
             {/* User Dropdown */}
             <div className="relative hidden sm:block">
-              <button
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors"
+              <Link
+                href="/profile"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setUserMenuOpen(!userMenuOpen);
+                }}
+                className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors cursor-pointer"
               >
                 <span className="text-sm font-medium truncate max-w-[150px]">
-                  {session?.user?.name || session?.user?.email || 'Guest'}
+                  {session?.user?.email || session?.user?.name || 'Guest'}
                 </span>
                 <svg
                   className={`w-4 h-4 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`}
@@ -118,7 +122,7 @@ export default function Navbar() {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-              </button>
+              </Link>
               
               {userMenuOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50">
@@ -212,9 +216,13 @@ export default function Navbar() {
                 </Link>
               ))}
               <div className="pt-2 px-4">
-                <div className="text-white text-sm mb-2 opacity-75">
-                  {session?.user?.name || session?.user?.email || 'Guest'}
-                </div>
+                <Link
+                  href="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-white text-sm mb-2 hover:bg-white/20 px-3 py-2 rounded-lg transition-colors"
+                >
+                  👤 {session?.user?.email || session?.user?.name || 'Guest'}
+                </Link>
               </div>
             </div>
           </div>
