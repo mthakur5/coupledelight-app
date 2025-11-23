@@ -184,7 +184,7 @@ export default function ProfilePage() {
                     {Boolean(profile.partner1Measurements) && <p><strong>Measurements:</strong> {String(profile.partner1Measurements)}</p>}
                   </div>
                 ) : (
-                  <p className="text-gray-900 font-medium">Partner 1 information not filled - Click Edit to add</p>
+                  <p className="text-gray-500 italic">Partner 1 information not filled - Click Edit to add</p>
                 )}
               </div>
 
@@ -201,7 +201,7 @@ export default function ProfilePage() {
                     {Boolean(profile.partner2Ethnicity) && <p><strong>Ethnicity:</strong> {String(profile.partner2Ethnicity)}</p>}
                   </div>
                 ) : (
-                  <p className="text-gray-900 font-medium">Partner 2 information not filled - Click Edit to add</p>
+                  <p className="text-gray-500 italic">Partner 2 information not filled - Click Edit to add</p>
                 )}
               </div>
             </div>
@@ -212,7 +212,7 @@ export default function ProfilePage() {
               {profile.bio ? (
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{String(profile.bio)}</p>
               ) : (
-                <p className="text-gray-900 font-medium">Bio not filled yet. Share your story!</p>
+                <p className="text-gray-500 italic">Bio not filled yet. Share your story!</p>
               )}
             </div>
 
@@ -251,7 +251,7 @@ export default function ProfilePage() {
                   )}
                 </>
               ) : (
-                <p className="text-gray-900 font-medium">Seeking preferences not set. What are you looking for?</p>
+                <p className="text-gray-500 italic">Seeking preferences not set. What are you looking for?</p>
               )}
             </div>
 
@@ -267,7 +267,7 @@ export default function ProfilePage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-900 font-medium">No interests added yet. What turns you on?</p>
+                <p className="text-gray-500 italic">No interests added yet. What turns you on?</p>
               )}
             </div>
 
@@ -277,7 +277,7 @@ export default function ProfilePage() {
               {profile.fantasies ? (
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{String(profile.fantasies)}</p>
               ) : (
-                <p className="text-gray-900 font-medium">Share your fantasies and desires here...</p>
+                <p className="text-gray-500 italic">Share your fantasies and desires here...</p>
               )}
             </div>
 
@@ -306,7 +306,7 @@ export default function ProfilePage() {
                   )}
                 </>
               ) : (
-                <p className="text-gray-900 font-medium">Boundaries not set. Let others know your limits!</p>
+                <p className="text-gray-500 italic">Boundaries not set. Let others know your limits!</p>
               )}
             </div>
 
@@ -335,7 +335,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
               ) : (
-                <p className="text-gray-900 font-medium">Meeting preferences not set - Click Edit to add</p>
+                <p className="text-gray-500 italic">Meeting preferences not set - Click Edit to add</p>
               )}
             </div>
 
@@ -370,15 +370,15 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-gray-700">
                 <div>
                   <p className="font-semibold">Smoking:</p>
-                  <p>{profile.smokingStatus ? String(profile.smokingStatus).split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : <span className="text-gray-900">Not specified</span>}</p>
+                  <p>{profile.smokingStatus ? String(profile.smokingStatus).split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : <span className="text-gray-500 italic">Not specified</span>}</p>
                 </div>
                 <div>
                   <p className="font-semibold">Drinking:</p>
-                  <p>{profile.drinkingStatus ? String(profile.drinkingStatus).split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : <span className="text-gray-900">Not specified</span>}</p>
+                  <p>{profile.drinkingStatus ? String(profile.drinkingStatus).split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : <span className="text-gray-500 italic">Not specified</span>}</p>
                 </div>
                 <div>
                   <p className="font-semibold">Drugs:</p>
-                  <p>{profile.drugsStatus ? (String(profile.drugsStatus) === 'no' ? 'No' : String(profile.drugsStatus).charAt(0).toUpperCase() + String(profile.drugsStatus).slice(1)) : <span className="text-gray-900">Not specified</span>}</p>
+                  <p>{profile.drugsStatus ? (String(profile.drugsStatus) === 'no' ? 'No' : String(profile.drugsStatus).charAt(0).toUpperCase() + String(profile.drugsStatus).slice(1)) : <span className="text-gray-500 italic">Not specified</span>}</p>
                 </div>
               </div>
               {Boolean(profile.idealScenario) && (
