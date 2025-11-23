@@ -41,35 +41,32 @@ export default function Navbar() {
     fetchNewCounts();
   }, [status]);
 
-  // Debug logging
-  console.log('Navbar render:', { status, hasSession: !!session, pathname, sessionUser: session?.user });
+  // Debug logging - check browser console for these messages
+  console.log('🔍 Navbar Debug:', {
+    status,
+    hasSession: !!session,
+    pathname,
+    sessionUser: session?.user?.email || 'no user',
+    timestamp: new Date().toISOString()
+  });
   
   // Don't show navbar on login or register pages
   if (pathname === '/login' || pathname === '/register') {
-    console.log('Hiding navbar: login/register page');
+    console.log('❌ Hiding navbar: login/register page');
     return null;
   }
   
-  // Don't show if unauthenticated
-  if (status === 'unauthenticated') {
-    console.log('Hiding navbar: unauthenticated status');
-    return null;
+  // TEMPORARY: Show navbar for everyone except login/register to debug
+  // We'll add back authentication check once we confirm it renders
+  if (status === 'loading') {
+    console.log('⏳ Status is loading, showing navbar anyway');
   }
   
-  // Don't show if loading and no session yet
-  if (status === 'loading' && !session) {
-    console.log('Hiding navbar: still loading, no session');
-    return null;
-  }
-  
-  // Don't show if no session (even if status is authenticated, we need session data)
   if (!session) {
-    console.log('Hiding navbar: no session data');
-    return null;
+    console.log('⚠️ No session detected but showing navbar anyway for debugging');
   }
   
-  // At this point we have a session, show the navbar
-  console.log('Showing full navbar for user:', session?.user?.email);
+  console.log('✅ Rendering Navbar');
 
   const isActive = (path: string) => {
     return pathname === path;
