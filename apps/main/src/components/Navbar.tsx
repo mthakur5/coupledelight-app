@@ -42,7 +42,7 @@ export default function Navbar() {
   }, [status]);
 
   // Debug logging
-  console.log('Navbar render:', { status, hasSession: !!session, pathname });
+  console.log('Navbar render:', { status, hasSession: !!session, pathname, sessionUser: session?.user });
   
   // Don't show navbar on login or register pages
   if (pathname === '/login' || pathname === '/register') {
@@ -50,27 +50,26 @@ export default function Navbar() {
     return null;
   }
   
-  // Show loading state while checking authentication
-  if (status === 'loading') {
-    console.log('Showing loading state');
-    return (
-      <nav className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 shadow-lg sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <span className="text-white">Loading...</span>
-          </div>
-        </div>
-      </nav>
-    );
-  }
-  
-  // Don't show if not authenticated
-  if (status === 'unauthenticated' || !session) {
-    console.log('Hiding navbar: not authenticated', { status, hasSession: !!session });
+  // If we're still loading and have no session, don't render yet
+  if (status === 'loading' && !session) {
+    console.log('Still loading, no session yet');
     return null;
   }
   
-  console.log('Showing full navbar');
+  // If explicitly unauthenticated, don't show
+  if (status === 'unauthenticated') {
+    console.log('Unauthenticated status');
+    return null;
+  }
+  
+  // If we have a session OR we're authenticated, show the navbar
+  // This handles the case where status might be 'loading' but session exists
+  if (!session && status !== 'authenticated') {
+    console.log('No session and not authenticated', { status });
+    return null;
+  }
+  
+  console.log('Showing full navbar for user:', session?.user?.email);
 
   const isActive = (path: string) => {
     return pathname === path;
