@@ -41,9 +41,10 @@ export default function Navbar() {
     fetchNewCounts();
   }, [status]);
 
-  // Don't show navbar on homepage, login, or register pages, or if user is not logged in
+  // Don't show navbar on login or register pages, or if user is not logged in
   if (status === 'loading') return null;
-  if (!session || pathname === '/' || pathname === '/login' || pathname === '/register') return null;
+  if (!session) return null;
+  if (pathname === '/login' || pathname === '/register') return null;
 
   const isActive = (path: string) => {
     return pathname === path;
