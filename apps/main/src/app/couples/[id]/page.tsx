@@ -72,12 +72,7 @@ export default function CoupleProfilePage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-    }
-  }, [status, router]);
-
-  useEffect(() => {
+    // Middleware already protects this route, so just fetch data when ready
     if (status === 'authenticated' && coupleId) {
       fetchCoupleProfile();
     }

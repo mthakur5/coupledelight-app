@@ -82,12 +82,7 @@ export default function SearchCouplesPage() {
   });
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-    }
-  }, [status, router]);
-
-  useEffect(() => {
+    // Middleware already protects this route, so just fetch data when ready
     if (status === 'authenticated') {
       searchCouples();
     }
@@ -202,21 +197,21 @@ export default function SearchCouplesPage() {
                     placeholder="City"
                     value={filters.city}
                     onChange={(e) => handleFilterChange('city', e.target.value)}
-                    className="w-full px-3 py-2 border border-pink-200 rounded-lg mb-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-400"
+                    className="w-full px-3 py-2 border border-pink-200 rounded-lg mb-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-900"
                   />
                   <input
                     type="text"
                     placeholder="State"
                     value={filters.state}
                     onChange={(e) => handleFilterChange('state', e.target.value)}
-                    className="w-full px-3 py-2 border border-pink-200 rounded-lg mb-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-400"
+                    className="w-full px-3 py-2 border border-pink-200 rounded-lg mb-2 focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-900"
                   />
                   <input
                     type="text"
                     placeholder="Country"
                     value={filters.country}
                     onChange={(e) => handleFilterChange('country', e.target.value)}
-                    className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-400"
+                    className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-900"
                   />
                 </div>
 
@@ -229,7 +224,7 @@ export default function SearchCouplesPage() {
                       placeholder="Min"
                       value={filters.minAge}
                       onChange={(e) => handleFilterChange('minAge', e.target.value)}
-                      className="w-1/2 px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-400"
+                      className="w-1/2 px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-900"
                       min="18"
                     />
                     <input
@@ -237,7 +232,7 @@ export default function SearchCouplesPage() {
                       placeholder="Max"
                       value={filters.maxAge}
                       onChange={(e) => handleFilterChange('maxAge', e.target.value)}
-                      className="w-1/2 px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-400"
+                      className="w-1/2 px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent placeholder:text-gray-900"
                       min="18"
                     />
                   </div>
