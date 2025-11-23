@@ -41,10 +41,24 @@ export default function Navbar() {
     fetchNewCounts();
   }, [status]);
 
-  // Don't show navbar on login or register pages, or if user is not logged in
-  if (status === 'loading') return null;
-  if (!session) return null;
+  // Don't show navbar on login or register pages
   if (pathname === '/login' || pathname === '/register') return null;
+  
+  // Show loading state while checking authentication
+  if (status === 'loading') {
+    return (
+      <nav className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 shadow-lg sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <span className="text-white">Loading...</span>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+  
+  // Don't show if not authenticated
+  if (!session) return null;
 
   const isActive = (path: string) => {
     return pathname === path;
