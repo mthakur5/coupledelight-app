@@ -103,13 +103,9 @@ export default function Navbar() {
           <div className="flex items-center space-x-3">
             {/* User Dropdown */}
             <div className="relative hidden sm:block">
-              <Link
-                href="/profile"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setUserMenuOpen(!userMenuOpen);
-                }}
-                className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors cursor-pointer"
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors"
               >
                 <span className="text-sm font-medium truncate max-w-[150px]">
                   {session?.user?.email || session?.user?.name || 'Guest'}
@@ -122,7 +118,7 @@ export default function Navbar() {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-              </Link>
+              </button>
               
               {userMenuOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50">
