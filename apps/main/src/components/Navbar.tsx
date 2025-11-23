@@ -41,32 +41,25 @@ export default function Navbar() {
     fetchNewCounts();
   }, [status]);
 
-  // Debug logging - check browser console for these messages
-  console.log('🔍 Navbar Debug:', {
-    status,
-    hasSession: !!session,
-    pathname,
-    sessionUser: session?.user?.email || 'no user',
-    timestamp: new Date().toISOString()
-  });
-  
-  // Don't show navbar on login or register pages
-  if (pathname === '/login' || pathname === '/register') {
-    console.log('❌ Hiding navbar: login/register page');
+  // Don't show navbar on homepage, login, or register pages
+  if (pathname === '/' || pathname === '/login' || pathname === '/register') {
     return null;
   }
   
-  // TEMPORARY: Show navbar for everyone except login/register to debug
-  // We'll add back authentication check once we confirm it renders
-  if (status === 'loading') {
-    console.log('⏳ Status is loading, showing navbar anyway');
+  // Don't show if unauthenticated
+  if (status === 'unauthenticated') {
+    return null;
   }
   
+  // Don't show if loading and no session yet
+  if (status === 'loading' && !session) {
+    return null;
+  }
+  
+  // Don't show if no session
   if (!session) {
-    console.log('⚠️ No session detected but showing navbar anyway for debugging');
+    return null;
   }
-  
-  console.log('✅ Rendering Navbar');
 
   const isActive = (path: string) => {
     return pathname === path;
